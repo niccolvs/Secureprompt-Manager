@@ -1,4 +1,3 @@
-# Secureprompt-Manager
 # SecurePrompt Manager
 Extensión de navegador con backend FastAPI + SpaCy + SQLite.
 
