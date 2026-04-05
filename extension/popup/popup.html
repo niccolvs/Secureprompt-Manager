@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>SecurePrompt Manager</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header>
+      <span class="logo">🔒 SecurePrompt</span>
+      <span class="version">v1.0</span>
+    </header>
+
+    <!-- ESTADO -->
+    <main>
+      <div class="status-card">
+        <div class="status-info">
+          <span class="status-label">Estado de protección</span>
+          <span class="status-value" id="status-text">Activo</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-btn" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <p class="description" id="description-text">
+        Tu información está siendo protegida.
+      </p>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <span class="footer-text">SecurePrompt Manager © 2025</span>
+    </footer>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
