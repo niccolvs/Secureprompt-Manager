@@ -93,3 +93,18 @@ def actualizar_prompt(prompt_id: int, prompt: PromptCreate):
     conn.close()
 
     return {"mensaje": f"Prompt {prompt_id} actualizado"}
+
+# Importar el analizador NER al inicio del archivo
+from app.ner import analizar_prompt
+
+# ── POST /prompts/analizar ────────────────────────
+# Analiza un prompt y detecta datos sensibles
+# antes de guardarlo
+@router.post("/prompts/analizar")
+def analizar(prompt: PromptCreate):
+    resultado = analizar_prompt(prompt.contenido)
+    return {
+        "titulo": prompt.titulo,
+        "categoria": prompt.categoria,
+        "analisis": resultado
+    }
