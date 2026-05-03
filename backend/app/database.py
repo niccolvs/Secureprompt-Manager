@@ -25,13 +25,28 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
+    # Tabla de prompts (ya existe)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS prompts (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo      TEXT NOT NULL,
-            contenido   TEXT NOT NULL,
-            categoria   TEXT NOT NULL,
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo         TEXT NOT NULL,
+            contenido      TEXT NOT NULL,
+            contenido_limpio TEXT NOT NULL,
+            categoria      TEXT NOT NULL,
             fecha_creacion TEXT NOT NULL
+        )
+    """)
+
+    # Tabla nueva — guarda el mapa token → dato real
+    # Cada token está relacionado con un prompt por prompt_id
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tokens (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            prompt_id   INTEGER NOT NULL,
+            token       TEXT NOT NULL,
+            valor_real  TEXT NOT NULL,
+            tipo        TEXT NOT NULL,
+            FOREIGN KEY (prompt_id) REFERENCES prompts(id)
         )
     """)
 

@@ -22,35 +22,48 @@ def obtener_prompts():
     return {"prompts": prompts}
 
 # ── POST /prompts ─────────────────────────────────
-# Guarda un nuevo prompt en SQLite
+# Analiza el prompt con SpaCy y guarda todo en SQLite
 @router.post("/prompts")
 def crear_prompt(prompt: PromptCreate):
+    # 1. Analizar el prompt con SpaCy
+    resultado = analizar_prompt(prompt.contenido)
+
     conn = get_connection()
     cursor = conn.cursor()
-
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
 
+    # 2. Guardar el prompt con el texto limpio
     cursor.execute("""
-        INSERT INTO prompts (titulo, contenido, categoria, fecha_creacion)
-        VALUES (?, ?, ?, ?)
-    """, (prompt.titulo, prompt.contenido, prompt.categoria, fecha))
+        INSERT INTO prompts (titulo, contenido, contenido_limpio, categoria, fecha_creacion)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        prompt.titulo,
+        prompt.contenido,
+        resultado["texto_limpio"],
+        prompt.categoria,
+        fecha
+    ))
+
+    prompt_id = cursor.lastrowid
+
+    # 3. Guardar cada token detectado por SpaCy
+    for token, datos in resultado["entidades_detectadas"].items():
+        cursor.execute("""
+            INSERT INTO tokens (prompt_id, token, valor_real, tipo)
+            VALUES (?, ?, ?, ?)
+        """, (prompt_id, token, datos["valor_real"], datos["tipo"]))
 
     conn.commit()
-
-    # Obtener el ID del prompt recién creado
-    nuevo_id = cursor.lastrowid
     conn.close()
 
     return {
-        "mensaje": "Prompt guardado",
-        "prompt": {
-            "id": nuevo_id,
-            "titulo": prompt.titulo,
-            "contenido": prompt.contenido,
-            "categoria": prompt.categoria,
-            "fecha_creacion": fecha
-        }
+        "mensaje": "Prompt guardado y analizado",
+        "prompt_id": prompt_id,
+        "texto_limpio": resultado["texto_limpio"],
+        "entidades_detectadas": resultado["entidades_detectadas"],
+        "total_entidades": resultado["total_entidades"]
     }
+
 
 # ── DELETE /prompts/{id} ──────────────────────────
 # Elimina un prompt por su ID
