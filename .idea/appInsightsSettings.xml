@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.securepromptapp" />
+                  <option name="mobileSdkAppId" value="1:1059291715077:android:610c1bcfc35e96d19f2e6c" />
+                  <option name="projectId" value="prompt-manager-1f2c5" />
+                  <option name="projectNumber" value="1059291715077" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
