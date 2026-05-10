@@ -1,0 +1,122 @@
+/* ── Login CSS ───────────────────────────────────
+   Mismos colores que el dashboard para consistencia
+   ─────────────────────────────────────────────── */
+
+:root {
+  --bg-primary: #0f1923;
+  --bg-card: #1a2535;
+  --accent: #1a9e75;
+  --accent-light: #24c491;
+  --accent-dim: rgba(26, 158, 117, 0.15);
+  --text-primary: #f0f4f8;
+  --text-secondary: #7e9ab8;
+  --text-muted: #4a6278;
+  --border: rgba(255, 255, 255, 0.07);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Contenedor principal ────────────────────────
+   Centrado vertical y horizontal en la pantalla
+   ─────────────────────────────────────────────── */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 32px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ── Logo ────────────────────────────────────────
+   Caja verde con el ícono de check
+   ─────────────────────────────────────────────── */
+.logo-box {
+  width: 72px;
+  height: 72px;
+  background: var(--accent);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+/* ── Títulos ─────────────────────────────────────*/
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+/* ── Botón Google ────────────────────────────────
+   Diseño similar al botón oficial de Google
+   pero con el estilo oscuro del proyecto
+   ─────────────────────────────────────────────── */
+.btn-google {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 24px;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.btn-google:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-google:active {
+  transform: scale(0.98);
+}
+
+/* ── Mensaje de error ────────────────────────────*/
+.error-msg {
+  font-size: 12px;
+  color: #f09595;
+  text-align: center;
+  min-height: 16px;
+}
+
+/* ── Términos ────────────────────────────────────*/
+.terms {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  margin-top: 8px;
+}

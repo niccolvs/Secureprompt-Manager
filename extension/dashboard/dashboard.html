@@ -6,6 +6,9 @@
   <title>SecurePrompt Manager</title>
   <!-- Vinculamos el CSS que acabamos de crear -->
   <link rel="stylesheet" href="dashboard.css" />
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 
 <body>
@@ -105,9 +108,14 @@
           Nuevo prompt
         </button>
 
-        <!-- Avatar con iniciales del usuario -->
-        <!-- Las iniciales las pondrá JavaScript dinámicamente -->
+        <!-- Avatar con menú de logout -->
+      <div class="avatar-container">
         <div class="avatar" id="user-avatar">DR</div>
+        <div class="avatar-menu" id="avatar-menu">
+          <span id="user-name">Usuario</span>
+          <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+        </div>
+</div>
       </div>
     </div>
 

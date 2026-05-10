@@ -471,3 +471,53 @@ body {
 .prompt-card-new:hover span {
   color: var(--accent-light);
 }
+
+/* ── Avatar con menú ─────────────────────────────
+   El menú aparece al hacer click en el avatar
+   ─────────────────────────────────────────────── */
+.avatar-container {
+  position: relative;
+}
+
+.avatar-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 42px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-width: 180px;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.avatar-menu.visible {
+  display: flex;
+}
+
+.avatar-menu span {
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.btn-logout {
+  background: none;
+  border: 1px solid rgba(240, 149, 149, 0.3);
+  border-radius: var(--radius-sm);
+  color: #f09595;
+  font-size: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.btn-logout:hover {
+  background: rgba(240, 149, 149, 0.1);
+}

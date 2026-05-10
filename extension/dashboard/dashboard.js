@@ -1,3 +1,50 @@
+// ── Configuración Firebase (misma que login.js) ───
+const firebaseConfig = {
+  apiKey: "AIzaSyCfJornBnJQnMU0r2qjBOUTTjG2i82ATgw",
+  authDomain: "prompt-manager-1f2c5.firebaseapp.com",
+  projectId: "prompt-manager-1f2c5",
+  storageBucket: "prompt-manager-1f2c5.firebasestorage.app",
+  messagingSenderId: "1059291715077",
+  appId: "1:1059291715077:web:580fd43dfe54888f9f2e6c"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// ── Proteger el dashboard ─────────────────────────
+// Si el usuario no está autenticado lo manda al login
+auth.onAuthStateChanged((user) => {
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    const nombre = user.displayName || user.email;
+    const iniciales = nombre.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+    document.getElementById("user-avatar").textContent = iniciales;
+
+    // Mostrar nombre en el menú
+    document.getElementById("user-name").textContent = user.displayName || user.email;
+  }
+});
+
+// ── Menú del avatar ───────────────────────────────
+document.getElementById("user-avatar").addEventListener("click", () => {
+  document.getElementById("avatar-menu").classList.toggle("visible");
+});
+
+// Cerrar menú al hacer click fuera
+document.addEventListener("click", (e) => {
+  const container = document.querySelector(".avatar-container");
+  if (!container.contains(e.target)) {
+    document.getElementById("avatar-menu").classList.remove("visible");
+  }
+});
+
+// ── Cerrar sesión ─────────────────────────────────
+document.getElementById("btn-logout").addEventListener("click", async () => {
+  await auth.signOut();
+  window.location.href = "login.html";
+});
+
 // dashboard.js — Lógica del dashboard
 // Conecta el frontend con el backend FastAPI
 
