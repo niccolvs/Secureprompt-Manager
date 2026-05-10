@@ -67,22 +67,23 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SecurePromptApp() {
     val auth = FirebaseAuth.getInstance()
-    // mutableStateOf con remember para forzar recomposición
     var isLoggedIn by remember { mutableStateOf(auth.currentUser != null) }
 
-    LaunchedEffect(auth.currentUser) {
-        isLoggedIn = auth.currentUser != null
+    // Escucha cambios en el estado de autenticación
+    DisposableEffect(Unit) {
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            isLoggedIn = firebaseAuth.currentUser != null
+        }
+        auth.addAuthStateListener(listener)
+        onDispose {
+            auth.removeAuthStateListener(listener)
+        }
     }
 
     if (isLoggedIn) {
         MainScreen()
     } else {
-        LoginScreen(
-            onLoginSuccess = {
-                // Verificar directamente en Firebase
-                isLoggedIn = auth.currentUser != null
-            }
-        )
+        LoginScreen(onLoginSuccess = { isLoggedIn = true })
     }
 }
 
@@ -374,6 +375,10 @@ fun HistorialScreen() {
 // ── Pantalla Perfil ───────────────────────────────
 @Composable
 fun PerfilScreen() {
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -381,18 +386,42 @@ fun PerfilScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(32.dp))
+
+        // Avatar con iniciales
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(80.dp)
                 .background(AccentDim, RoundedCornerShape(50))
         ) {
-            Text("DR", fontSize = 28.sp, color = AccentLight, fontWeight = FontWeight.Bold)
+            val iniciales = user?.displayName
+                ?.split(" ")
+                ?.mapNotNull { it.firstOrNull()?.toString() }
+                ?.take(2)
+                ?.joinToString("") ?: "?"
+            Text(iniciales, fontSize = 28.sp, color = AccentLight, fontWeight = FontWeight.Bold)
         }
+
         Spacer(modifier = Modifier.height(12.dp))
-        Text("David Retuerto", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-        Text("Líder del proyecto", fontSize = 13.sp, color = TextMuted)
+
+        // Nombre del usuario
+        Text(
+            text = user?.displayName ?: "Usuario",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary
+        )
+
+        // Email
+        Text(
+            text = user?.email ?: "",
+            fontSize = 13.sp,
+            color = TextMuted
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Información
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = BgCard),
@@ -417,6 +446,28 @@ fun PerfilScreen() {
                     Text("Android", fontSize = 13.sp, color = TextPrimary)
                 }
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón cerrar sesión
+        Button(
+            onClick = {
+                auth.signOut()
+                Toast.makeText(context, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0x33f09595)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                "Cerrar sesión",
+                fontSize = 14.sp,
+                color = Color(0xFFf09595),
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
