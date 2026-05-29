@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from app.models import PromptCreate
 from app.database import get_connection
 from datetime import datetime
+from app.ner import analizar_prompt
 
 router = APIRouter()
 
@@ -106,9 +107,6 @@ def actualizar_prompt(prompt_id: int, prompt: PromptCreate):
     conn.close()
 
     return {"mensaje": f"Prompt {prompt_id} actualizado"}
-
-# Importar el analizador NER al inicio del archivo
-from app.ner import analizar_prompt
 
 # ── POST /prompts/analizar ────────────────────────
 # Analiza un prompt y detecta datos sensibles
