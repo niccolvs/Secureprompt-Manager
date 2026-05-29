@@ -1,11 +1,10 @@
 import spacy
 import re
-from spacy.pipeline import EntityRuler
 
-# Aplicamos el modelo es_core_news_lg para nombres y lugares:
+# Primero, cargamos el modelo de SpaCy
 nlp = spacy.load("es_core_news_lg")
 
-# Ahora, como estamos aplicandolo primeramente para Chile, utilizaremos una rule que tenga prioridad en entidades conocidas
+# Establecemos las reglas para detectar localidades Chilenas
 
 ruler = nlp.add_pipe("entity_ruler", before = "ner", config = {"overwrite_ents" : True})
 
@@ -75,27 +74,27 @@ PATRONES_REGEX = {
 def analizar_prompt(texto: str) -> dict:
     todos_matches = []
 
-    # 0. ESCUDO: Detectar tokens que YA existían en el texto para protegerlos
+    # Primeramente, detectamos los tokens ya revisados en el texto, para evitar duoplicacion o que se evite la anonimizacion
     patron_token_previo = r"\[[A-ZÁÉÍÓÚa-záéíóúÑñ_]+_\d+\]"
     for match in re.finditer(patron_token_previo, texto):
         todos_matches.append((match.start(), match.end(), "TOKEN_EXISTENTE", match.group(0)))
 
-    # 1. Detectar Regex sobre el texto ORIGINAL
+    # Detectamos los patrones del regex sobre el texto original
     for tipo, patron in PATRONES_REGEX.items():
         for match in re.finditer(patron, texto):
             todos_matches.append((match.start(), match.end(), tipo, match.group(0)))
 
-    # 2. Detectar NER de spaCy sobre el texto ORIGINAL
+    # Ahora, detectamos las entidades con SpaCy sobre el texto original
     doc = nlp(texto)
     for ent in doc.ents:
         if ent.label_ in ENTIDADES_SENSIBLES:
             tipo = ENTIDADES_SENSIBLES[ent.label_]
             todos_matches.append((ent.start_char, ent.end_char, tipo, ent.text))
 
-    # 3. Ordenar matches resolviendo solapamientos
-    # Le damos prioridad 0 a los TOKENS_EXISTENTES para que bloqueen su rango de caracteres
+    # Ahora, ordenamos los matches, en base a su posicion en el texto, y si ya existe un token previo le damos la prioridad
     todos_matches.sort(key=lambda x: (x[0], 0 if x[2] == "TOKEN_EXISTENTE" else 1, -(x[1] - x[0])))
 
+    # Guardamos los matches validos, de forma que se eviten lso solapamientos
     matches_validos = []
     ultimo_fin = -1
     for match in todos_matches:
@@ -104,7 +103,7 @@ def analizar_prompt(texto: str) -> dict:
             matches_validos.append(match)
             ultimo_fin = end
 
-    # 4. Sincronizar el estado de los contadores con los números de los tokens que ya existen
+    # Sincronizamos los contadores, de forma que si ya existia un token previo, el contador de ese tipo se actualice para evitar duplicados
     contadores = {}
     for start, end, tipo, valor_real in matches_validos:
         if tipo == "TOKEN_EXISTENTE":
@@ -123,10 +122,9 @@ def analizar_prompt(texto: str) -> dict:
     # Volvemos a ordenar según la lectura normal del texto
     matches_validos.sort(key=lambda x: x[0])
 
-    # 5. Generar los reemplazos
+    # Generamos los reemplazos de cada match valido, y actualizamos cada contador establecido anteriormente
     for start, end, tipo, valor_real in matches_validos:
         if tipo == "TOKEN_EXISTENTE":
-            # Si ya era un token, lo dejamos exactamente como estaba. No se toca.
             reemplazos.append((start, end, valor_real))
             continue
 
@@ -140,7 +138,7 @@ def analizar_prompt(texto: str) -> dict:
         mapa_tokens[token] = {"valor_real": valor_real, "tipo": tipo}
         reemplazos.append((start, end, token))
 
-    # 6. Aplicar los reemplazos en orden inverso
+    # Ahora, aplicamos los reemplazos al texto original, comenzando desde el final para evitar problemas de desplazamiento en los indices
     texto_limpio = texto
     for start, end, token in reversed(reemplazos):
         texto_limpio = texto_limpio[:start] + token + texto_limpio[end:]
