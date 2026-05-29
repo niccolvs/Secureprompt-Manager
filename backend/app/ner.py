@@ -9,7 +9,6 @@ ENTIDADES_SENSIBLES = {
     "LOC": "Lugar"
 }
 
-# ── Nuevos patrones Regex ────────────────────────
 PATRONES_REGEX = {
     "RUT": r"\b\d{1,2}\.\d{3}\.\d{3}[-‐][0-9kK]\b|\b\d{7,8}[-‐][0-9kK]\b",
     "TARJETA": r"\b(?:\d[ -]*?){13,16}\b",
@@ -22,7 +21,6 @@ def analizar_prompt(texto: str) -> dict:
     mapa_tokens = {}
     contador = 1
 
-    # 1. Primero buscamos con Regex (RUT, Tarjetas, etc.)
     for tipo, patron in PATRONES_REGEX.items():
         coincidencias = re.finditer(patron, texto_limpio)
         for match in coincidencias:
@@ -36,7 +34,6 @@ def analizar_prompt(texto: str) -> dict:
             texto_limpio = texto_limpio.replace(valor_real, token)
             contador += 1
 
-    # 2. Luego pasamos SpaCy al texto restante
     doc = nlp(texto_limpio)
     for entidad in doc.ents:
         if entidad.label_ in ENTIDADES_SENSIBLES:
