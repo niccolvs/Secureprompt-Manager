@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1059291715077",
+    "project_id": "prompt-manager-1f2c5",
+    "storage_bucket": "prompt-manager-1f2c5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059291715077:android:610c1bcfc35e96d19f2e6c",
+        "android_client_info": {
+          "package_name": "com.example.securepromptapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1059291715077-2odtrqlqq4m1nn03kdjnae18426kjmji.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.securepromptapp",
+            "certificate_hash": "0b919e61c6c4a1a364ce7d57e418d81adf53c28f"
+          }
+        },
+        {
+          "client_id": "1059291715077-j8fsb70pi3f2i07qcd4oh7dn485s0qis.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArUKTbVVtwfzRKxB8AyhjrTyQt3e30cus"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1059291715077-j8fsb70pi3f2i07qcd4oh7dn485s0qis.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
