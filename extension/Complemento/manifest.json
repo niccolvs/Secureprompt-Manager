@@ -19,7 +19,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://chatgpt.com/*"],
+      "matches": ["https://chatgpt.com/*",
+      "https://chat.openai.com/*",
+      "https://claude.ai/*",
+      "https://gemini.google.com/*",
+      "https://chat.deepseek.com/*",
+      "https://manus.im/*"
+      ],
       "js": ["content.js"]
     }
   ]
