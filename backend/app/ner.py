@@ -1,6 +1,6 @@
 import spacy
 import re
-
+import unicodedata
 # Primero, cargamos el modelo de SpaCy
 nlp = spacy.load("es_core_news_lg")
 
@@ -70,6 +70,44 @@ PATRONES_REGEX = {
     "TELEFONO": r"\+?56\s?9\s?\d{4}\s?\d{4}|\b\d{8,9}\b"
 }
 
+# Debido a ciertos percandes, se añade esta linea para poder identificar cosas que SpaCy no hace correctamente, como comas (,), etc.
+
+PALABRAS_IGNORAR = {
+    # saludos y cortesía
+    "hola", "chao", "adios", "gracias", "saludos", "buenas", "buenos",
+    "buenos dias", "buenas tardes", "buenas noches", "estimado", "estimada",
+    "atentamente", "cordialmente", "porfavor", "por favor",
+    # palabras de campo / etiquetas
+    "rut", "ruts", "fono", "tel", "telefono", "celular", "correo", "mail",
+    "email", "nombre", "nombres", "apellido", "apellidos", "direccion",
+    "domicilio", "comuna", "region", "ciudad", "calle", "avenida", "pasaje",
+    # interrogativos y conectores que aparecen en mayúscula al inicio
+    "como", "que", "cual", "donde", "cuando", "quien", "porque",
+    # días y meses
+    "lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo",
+    "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+    "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+}
+
+# Ademas, notamos que con acentos, tíldes y algunas mayusculas tiene problemas, por lo que normalizamos el texto
+def _normalizar(texto: str) -> str:
+    t = texto.strip().lower()
+    t = "".join(
+        c for c in unicodedata.normalize("NFD", t)
+        if unicodedata.category(c) != "Mn"
+    )
+    return t
+
+# Ademas, como fue mencionado, con ciertas puntuiaciones se tienen algunos problemas, por lo que lo tratamos
+def _recortar_puntuacion(texto: str, start: int, end: int):
+    izq = 0
+    while izq < len(texto) and not texto[izq].isalnum():
+        izq += 1
+    der = len(texto)
+    while der > izq and not texto[der - 1].isalnum():
+        der -= 1
+    return texto[izq:der], start + izq, end - (len(texto) - der)
+
 # Mediante la funcion, asignaremos los patrones para la deteccion y demas
 def analizar_prompt(texto: str) -> dict:
     todos_matches = []
@@ -87,11 +125,20 @@ def analizar_prompt(texto: str) -> dict:
     # Ahora, detectamos las entidades con SpaCy sobre el texto original
     doc = nlp(texto)
     for ent in doc.ents:
-        if ent.label_ in ENTIDADES_SENSIBLES:
-            tipo = ENTIDADES_SENSIBLES[ent.label_]
-            todos_matches.append((ent.start_char, ent.end_char, tipo, ent.text))
+        if ent.label_ not in ENTIDADES_SENSIBLES:
+            continue
 
-    # Ahora, ordenamos los matches, en base a su posicion en el texto, y si ya existe un token previo le damos la prioridad
+        valor, s, e = _recortar_puntuacion(ent.text, ent.start_char, ent.end_char)
+
+        if len(valor) < 2:
+            continue
+        if _normalizar(valor) in PALABRAS_IGNORAR:
+            continue
+
+        tipo = ENTIDADES_SENSIBLES[ent.label_]
+        todos_matches.append((s, e, tipo, valor))
+
+    # Ahora, ordenamos los matches, con base en su posicion en el texto, y si ya existe un token previo le damos la prioridad
     todos_matches.sort(key=lambda x: (x[0], 0 if x[2] == "TOKEN_EXISTENTE" else 1, -(x[1] - x[0])))
 
     # Guardamos los matches validos, de forma que se eviten lso solapamientos
@@ -134,7 +181,7 @@ def analizar_prompt(texto: str) -> dict:
         else:
             contadores[tipo] += 1
 
-        token = f"[{tipo}_{contadores[tipo]}]"
+        token = f"[{tipo.capitalize()}_{contadores[tipo]}]"
         mapa_tokens[token] = {"valor_real": valor_real, "tipo": tipo}
         reemplazos.append((start, end, token))
 
