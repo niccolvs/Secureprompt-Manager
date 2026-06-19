@@ -91,6 +91,113 @@ function establecerTexto(caja, texto) {
     }
 }
 
+
+function crearPanel(mapaTokens, onRevertirPrompt) {
+    if (document.getElementById("secure-prompt-panel")) return;
+
+    // Fondo transparente para cerrar al hacer click fuera
+    const overlay = document.createElement("div");
+    overlay.id = "secure-prompt-panel-overlay";
+    Object.assign(overlay.style, {
+        position: "fixed", inset: "0", zIndex: "99998",
+    });
+
+    const panel = document.createElement("div");
+    panel.id = "secure-prompt-panel";
+    Object.assign(panel.style, {
+        position:        "fixed",
+        bottom:          "140px",
+        right:           "20px",
+        width:           "320px",
+        backgroundColor: "#1e1e2e",
+        borderRadius:    "16px",
+        boxShadow:       "0 8px 32px rgba(0,0,0,0.4)",
+        zIndex:          "99999",
+        padding:         "16px",
+        color:           "white",
+        fontFamily:      "system-ui, sans-serif",
+        fontSize:        "13px",
+    });
+
+    panel.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-weight:700;font-size:14px;">\uD83D\uDEE1\uFE0F SecurePrompt</span>
+            <button id="sp-cerrar" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;">&times;</button>
+        </div>
+
+        <label style="font-size:12px;color:#aaa;display:block;margin-bottom:6px;">
+            Pega la respuesta del chat:
+        </label>
+        <textarea id="sp-input" placeholder="Pega aquí el texto con tokens [Persona_1]..."
+            style="width:100%;height:90px;background:#2a2a3e;border:1px solid #444;
+                   border-radius:8px;color:white;padding:8px;font-size:12px;
+                   resize:vertical;box-sizing:border-box;"></textarea>
+
+        <button id="sp-revertir-respuesta"
+            style="width:100%;padding:8px;background:#10a37f;border:none;border-radius:8px;
+                   color:white;font-weight:600;cursor:pointer;margin:8px 0;">
+            \u21A9\uFE0F Revertir respuesta
+        </button>
+
+        <div id="sp-resultado-wrap" style="display:none;margin-bottom:8px;">
+            <label style="font-size:12px;color:#aaa;display:block;margin-bottom:6px;">Resultado:</label>
+            <textarea id="sp-resultado" readonly
+                style="width:100%;height:90px;background:#2a2a3e;border:1px solid #444;
+                       border-radius:8px;color:#7cefcb;padding:8px;font-size:12px;
+                       resize:vertical;box-sizing:border-box;"></textarea>
+            <button id="sp-copiar"
+                style="width:100%;padding:6px;background:#2a2a3e;border:1px solid #444;
+                       border-radius:8px;color:white;cursor:pointer;margin-top:6px;font-size:12px;">
+                \uD83D\uDCCB Copiar resultado
+            </button>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #333;margin:8px 0;">
+
+        <button id="sp-revertir-prompt"
+            style="width:100%;padding:8px;background:#2a2a3e;border:1px solid #444;
+                   border-radius:8px;color:white;cursor:pointer;font-size:12px;">
+            \u21A9\uFE0F Revertir también el prompt
+        </button>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+
+    const cerrar = () => { overlay.remove(); panel.remove(); };
+    overlay.addEventListener("click", cerrar);
+    panel.querySelector("#sp-cerrar").addEventListener("click", cerrar);
+
+    // Revertir la respuesta pegada
+    panel.querySelector("#sp-revertir-respuesta").addEventListener("click", () => {
+        const input = panel.querySelector("#sp-input").value;
+        if (!input.trim()) return;
+
+        let texto = input;
+        for (const [token, datos] of Object.entries(mapaTokens)) {
+            texto = texto.replaceAll(token, datos.valor_real);
+        }
+
+        panel.querySelector("#sp-resultado").value = texto;
+        panel.querySelector("#sp-resultado-wrap").style.display = "block";
+    });
+
+    // Copiar resultado
+    panel.querySelector("#sp-copiar").addEventListener("click", () => {
+        navigator.clipboard.writeText(panel.querySelector("#sp-resultado").value).then(() => {
+            const btn = panel.querySelector("#sp-copiar");
+            btn.textContent = "\u2705 Copiado";
+            setTimeout(() => { btn.textContent = "\uD83D\uDCCB Copiar resultado"; }, 1500);
+        });
+    });
+
+    // Revertir el prompt original
+    panel.querySelector("#sp-revertir-prompt").addEventListener("click", () => {
+        onRevertirPrompt();
+        cerrar();
+    });
+}
+
 // Establecemos el boton flotante
 function crearBotonFlotante() {
     if (document.getElementById("secure-prompt-global-btn")) return;
@@ -142,6 +249,9 @@ function crearBotonFlotante() {
         transition:      "width 0.25s ease, border-radius 0.25s ease, background-color 0.2s ease",
     });
 
+    // Creamos las variables para póder realizar la reversion a los datos originales
+    let mapaTokensActual = {};
+    let estadoRevertible = false;
     let expandido = false;
 
     // Establecemos el estado expandido
@@ -229,6 +339,31 @@ function crearBotonFlotante() {
         e.preventDefault();
         e.stopPropagation();
 
+
+        // Segundo click en modo revertible → abrir panel
+        if (expandido && estadoRevertible) {
+            colapsar();
+            crearPanel(
+                mapaTokensActual,
+                () => {
+                    // Callback: revertir el prompt desde el panel
+                    const cajaTexto = encontrarCajaTexto();
+                    if (cajaTexto) {
+                        let texto = obtenerTexto(cajaTexto);
+                        for (const [token, datos] of Object.entries(mapaTokensActual)) {
+                            texto = texto.replaceAll(token, datos.valor_real);
+                        }
+                        establecerTexto(cajaTexto, texto);
+                    }
+                    mapaTokensActual      = {};
+                    estadoRevertible      = false;
+                    iconSpan.textContent  = "\uD83D\uDEE1\uFE0F";
+                    labelSpan.textContent = "Anonimizar";
+                }
+            );
+            return;
+        }
+
         // Primero se expande
         if (!expandido) {
             expandir();
@@ -285,10 +420,18 @@ function crearBotonFlotante() {
                 }
 
                 establecerTexto(cajaTexto, response.data.analisis.texto_limpio);
+
+                // Guardamos el mapa para poder revertirlo
+                mapaTokensActual = response.data.analisis.entidades_detectadas;
+                estadoRevertible = true;
+
+                // Mostramos el check brevemente, luego cambiamos al icono de revertir
+                // para indicarle al usuario que puede deshacer la anonimizacion
                 iconSpan.textContent        = "\u2705";
                 boton.style.backgroundColor = "#16a34a";
                 setTimeout(() => {
-                    iconSpan.textContent        = "\uD83D\uDEE1\uFE0F";
+                    iconSpan.textContent        = "\u21A9\uFE0F";
+                    labelSpan.textContent       = "Revertir";
                     boton.style.backgroundColor = "#10a37f";
                 }, 2000);
             }
