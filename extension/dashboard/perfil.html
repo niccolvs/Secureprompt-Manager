@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil — SecurePrompt Manager</title>
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="perfil.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <!-- Guard: redirige a login si no hay sesión activa -->
+  <script>
+    const _cfg = {
+      apiKey: "AIzaSyCfJornBnJQnMU0r2qjBOUTTjG2i82ATgw",
+      authDomain: "prompt-manager-1f2c5.firebaseapp.com",
+      projectId: "prompt-manager-1f2c5",
+      storageBucket: "prompt-manager-1f2c5.firebasestorage.app",
+      messagingSenderId: "1059291715077",
+      appId: "1:1059291715077:web:580fd43dfe54888f9f2e6c"
+    };
+    firebase.initializeApp(_cfg);
+    const _auth = firebase.auth();
+
+    // Ocultar hasta confirmar sesión
+    document.documentElement.style.visibility = "hidden";
+
+    _auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        // ── Poblar datos del usuario ─────────────────
+        const initials = (user.displayName || user.email)
+          .split(" ").slice(0, 2).map(w => w[0].toUpperCase()).join("");
+
+        document.getElementById("profile-name").textContent  = user.displayName || user.email;
+        document.getElementById("profile-email").textContent = user.email;
+
+        // Avatar: foto de Google si existe, si no muestra iniciales
+        const avatarEl = document.getElementById("profile-avatar");
+        if (user.photoURL) {
+          avatarEl.innerHTML = `<img src="${user.photoURL}" alt="Foto de perfil" class="avatar-img">`;
+        } else {
+          avatarEl.textContent = initials;
+          avatarEl.classList.add("avatar-initials");
+        }
+
+        document.documentElement.style.visibility = "";
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager"
+        style="max-width:140px;height:auto;display:block" />
+    </div>
+    <nav class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#">Tus prompts</a>
+      <a href="#">Historial</a>
+      <a href="#">Extensión</a>
+      <a href="perfil.html" class="active">Perfil</a>
+    </nav>
+    <div class="logout-container">
+      <button class="btn-logout" id="btn-logout">
+        <i class="ti ti-logout"></i> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Contenido principal ── -->
+  <main class="main-content">
+
+    <!-- Sección de perfil -->
+    <section class="profile-section">
+      <div class="avatar-wrapper">
+        <div class="avatar-circle" id="profile-avatar"></div>
+        <div class="camera-badge" title="Cambiar foto">
+          <i class="ti ti-camera"></i>
+        </div>
+      </div>
+
+      <h1 class="profile-name" id="profile-name"></h1>
+      <p class="profile-email" id="profile-email"></p>
+
+      <div class="profile-actions">
+        <button class="btn-outline">Editar perfil</button>
+        <button class="btn-outline">Ajustes</button>
+      </div>
+    </section>
+
+    <!-- Sección de cuentas enlazadas -->
+    <section class="linked-accounts-card">
+      <h2 class="card-title">Cuentas enlazadas</h2>
+      <div class="account-list">
+        <div class="account-item">
+          <span>ChatGPT</span>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="account-item">
+          <span>Gemini</span>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="account-item">
+          <span>Claude</span>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="account-item">
+          <span>Deepseek</span>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="account-item">
+          <span>Manus</span>
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ── Cerrar sesión ─────────────────────────────
+    document.getElementById("btn-logout").addEventListener("click", () => {
+      _auth.signOut().then(() => {
+        window.location.replace("login.html");
+      });
+    });
+  </script>
+
+</body>
+
+</html>
