@@ -3,199 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SecurePrompt Manager</title>
-  <!-- Vinculamos el CSS que acabamos de crear -->
-  <link rel="stylesheet" href="dashboard.css" />
-  <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <meta name="description" content="Dashboard del Secure Prompt Manager — gestiona tu historial, estadísticas y prompts guardados de forma segura." />
+  <title>Dashboard — SecurePrompt Manager</title>
+
+  <!-- Tabler Icons (necesarios para los íconos ti-*) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
+  <style>
+    /* ── Reset mínimo ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #EFF4FA; }
+
+    /* ── Estilos del componente ── */
+    .spm-root{display:flex;height:580px;background:#EFF4FA;border-radius:12px;overflow:hidden;border:0.5px solid #C0D4E8}
+    .spm-sidebar{width:196px;background:#5C7FA3;display:flex;flex-direction:column;padding:22px 0;flex-shrink:0}
+    .spm-logo{padding:0 22px 26px;color:#fff;font-size:38px;font-weight:900;letter-spacing:1px;line-height:1}
+    .spm-nav-item{padding:11px 22px;cursor:pointer;font-size:14px;color:#fff;font-weight:400;border-radius:0 24px 24px 0;margin-bottom:2px;transition:background .12s,color .12s}
+    .spm-nav-item.active{background:#fff;color:#2C3D58;font-weight:700}
+    .spm-logout{padding:12px 22px;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;opacity:.9;margin-top:auto}
+    .spm-main{flex:1;padding:22px 26px;display:flex;flex-direction:column;overflow:hidden}
+    .spm-topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
+    .spm-title{margin:0;font-size:24px;font-weight:400;color:#1C2B3A}
+    .spm-user{display:flex;align-items:center;gap:10px}
+    .spm-avatar{width:34px;height:34px;border-radius:50%;background:#5C7FA3;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;font-size:13px}
+    .spm-section-title{font-size:14px;color:#1C2B3A;margin-bottom:8px}
+    .spm-h2{margin:0 0 16px;font-size:18px;font-weight:400;color:#1C2B3A}
+    .spm-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .spm-hist{background:#2C3D58;border-radius:10px;padding:12px 18px}
+    .spm-hist-row{display:flex;align-items:center;color:#fff;font-size:13px;padding:8px 0}
+    .spm-hist-row+.spm-hist-row{border-top:1px solid rgba(255,255,255,.08)}
+    .spm-stats{background:#fff;border:1.5px solid #C0D4E8;border-radius:10px;padding:12px 18px}
+    .spm-stat-row{display:flex;justify-content:space-between;align-items:center}
+    .spm-stat-row+.spm-stat-row{border-top:1px solid #EEF2F8;margin-top:10px;padding-top:10px}
+    .spm-stat-num{font-size:36px;font-weight:700;color:#2C3D58;line-height:1}
+    .spm-stat-lbl{font-size:14px;font-weight:500;color:#2C3D58}
+    .spm-prompt-item{background:#E8EFF8;border-radius:9px;padding:11px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;font-size:13px;color:#1C2B3A;margin-bottom:7px;transition:background .12s}
+    .spm-prompt-item.sel{background:#C4D8EE;font-weight:500}
+    .spm-detail{background:#CEDFEE;border-radius:10px;padding:14px 16px}
+    .spm-tag{border-radius:20px;padding:3px 11px;font-size:11px;font-weight:500;display:inline-block;margin-right:5px;margin-bottom:5px}
+    .spm-btn{padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:12px}
+    .spm-btn-ghost{background:rgba(255,255,255,.55);color:#2C3D58}
+    .spm-btn-dark{background:#2C3D58;color:#fff}
+  </style>
 </head>
 
 <body>
 
-  <!-- ================================================
-       SIDEBAR — Barra lateral de navegación
-       Contiene el logo y los links del menú.
-       Está fuera del main-content porque es fijo
-       y no scrollea con el contenido principal.
-       ================================================ -->
-  <aside class="sidebar">
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
+    Dashboard del Secure Prompt Manager — muestra historial, estadísticas y prompts guardados
+  </h2>
 
-    <!-- Logo de la aplicación -->
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">
-        <!-- Ícono SVG del candado/check -->
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M4 8L7 11L12 5" stroke="white" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+  <div class="spm-root" id="app">
+    <!-- ── Sidebar ── -->
+    <div class="spm-sidebar">
+      <div class="spm-logo">
+        <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager" style="max-width:140px;height:auto;display:block" />
       </div>
-      <span class="sidebar-logo-text">SecurePrompt</span>
+      <nav id="sidenav" aria-label="Navegación principal"></nav>
+      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesión">
+        <i class="ti ti-logout" aria-hidden="true" style="font-size:16px"></i>
+        Cerrar sesión
+      </div>
     </div>
 
-    <!-- Links de navegación -->
-    <!-- La clase "active" marca la página actual -->
-    <a href="dashboard.html" class="nav-item active">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="2" y="2" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-        <rect x="9" y="2" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-        <rect x="2" y="9" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-        <rect x="9" y="9" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-      Dashboard
-    </a>
-
-    <a href="prompts.html" class="nav-item">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M3 4h10M3 8h10M3 12h6"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Mis prompts
-    </a>
-
-    <a href="historial.html" class="nav-item">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M8 5v3l2 1.5" stroke="currentColor"
-          stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Historial
-    </a>
-
-    <!-- bottom lo empuja al fondo del sidebar -->
-    <a href="perfil.html" class="nav-item bottom">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Perfil
-    </a>
-
-  </aside>
-
-
-  <!-- ================================================
-       CONTENIDO PRINCIPAL
-       Todo lo que va a la derecha del sidebar.
-       Este sí scrollea si hay mucho contenido.
-       ================================================ -->
-  <main class="main-content">
-
-    <!-- ── Barra superior ── -->
-    <div class="topbar">
-      <h1 class="topbar-title">Mis prompts</h1>
-
-      <div class="topbar-controls">
-        <!-- Buscador — por ahora solo diseño, JS lo activamos después -->
-        <input
-          type="text"
-          class="search-input"
-          placeholder="Buscar prompts..."
-          id="search-input"
-        />
-
-        <!-- Botón para crear nuevo prompt -->
-        <button class="btn-new" id="btn-new-prompt">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v10M1 6h10" stroke="white"
-              stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          Nuevo prompt
-        </button>
-
-        <!-- Avatar con menú de logout -->
-      <div class="avatar-container">
-        <div class="avatar" id="user-avatar">DR</div>
-        <div class="avatar-menu" id="avatar-menu">
-          <span id="user-name">Usuario</span>
-          <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    <!-- ── Contenido principal ── -->
+    <div class="spm-main">
+      <div class="spm-topbar">
+        <h1 class="spm-title">Hola, Olivia!</h1>
+        <div class="spm-user">
+          <i class="ti ti-bell" aria-hidden="true" style="font-size:18px;color:#6A8099"></i>
+          <div style="text-align:right">
+            <div style="font-size:13px;font-weight:500;color:#1C2B3A">Olivia Wallace</div>
+            <div style="font-size:11px;color:#6A8099">olivia.wallace@gmail.com</div>
+          </div>
+          <div class="spm-avatar" aria-label="Avatar de Olivia Wallace">OW</div>
         </div>
-</div>
       </div>
-    </div>
 
+      <h2 class="spm-h2">Dashboard</h2>
 
-    <!-- ── Estadísticas ── -->
-    <!-- Estos números los actualizará JavaScript según los prompts guardados -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total prompts</div>
-        <div class="stat-value accent" id="stat-total">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Esta semana</div>
-        <div class="stat-value" id="stat-semana">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Favoritos</div>
-        <div class="stat-value" id="stat-favoritos">0</div>
-      </div>
-    </div>
-
-
-    <!-- ── Lista de prompts ── -->
-    <div class="section-title">Recientes</div>
-
-    <!-- 
-      Este grid lo llenará JavaScript dinámicamente.
-      Por ahora ponemos 2 tarjetas de ejemplo para
-      ver cómo se ve el diseño.
-    -->
-    <div class="prompts-grid" id="prompts-grid">
-
-      <!-- Tarjeta de ejemplo 1 -->
-      <div class="prompt-card featured">
-        <div class="prompt-title">Resumen ejecutivo</div>
-        <div class="prompt-preview">
-          Actúa como consultor senior y resume el siguiente
-          documento en 3 puntos clave con lenguaje claro...
+      <!-- ── Fila superior: Historial + Estadísticas ── -->
+      <div class="spm-grid">
+        <div>
+          <div class="spm-section-title">Historial</div>
+          <div class="spm-hist">
+            <div class="spm-hist-row"><span style="font-weight:700;width:68px">Gemini</span><span style="flex:1">14-05</span><span>15:32</span></div>
+            <div class="spm-hist-row"><span style="font-weight:700;width:68px">Gemini</span><span style="flex:1">12-05</span><span>17:32</span></div>
+            <div class="spm-hist-row"><span style="font-weight:700;width:68px">Claude</span><span style="flex:1">12-05</span><span>16:56</span></div>
+          </div>
         </div>
-        <div class="prompt-footer">
-          <span class="tag">Trabajo</span>
-          <div class="prompt-actions">
-            <button class="action-btn">Editar</button>
-            <button class="action-btn danger">Eliminar</button>
+        <div>
+          <div class="spm-section-title">Estadísticas de uso</div>
+          <div class="spm-stats">
+            <div class="spm-stat-row"><span class="spm-stat-lbl">Censuras</span><span class="spm-stat-num">3</span></div>
+            <div class="spm-stat-row"><span class="spm-stat-lbl">Plantillas usadas</span><span class="spm-stat-num">1</span></div>
           </div>
         </div>
       </div>
 
-      <!-- Tarjeta de ejemplo 2 -->
-      <div class="prompt-card">
-        <div class="prompt-title">Corrector de código</div>
-        <div class="prompt-preview">
-          Revisa el siguiente código, identifica errores
-          y explica cada corrección paso a paso...
+      <!-- ── Fila inferior: Prompts + Detalle ── -->
+      <div class="spm-grid" style="margin-bottom:0;flex:1">
+        <div>
+          <div class="spm-section-title">Tus prompts</div>
+          <div id="prompts-list"></div>
         </div>
-        <div class="prompt-footer">
-          <span class="tag">Desarrollo</span>
-          <div class="prompt-actions">
-            <button class="action-btn">Editar</button>
-            <button class="action-btn danger">Eliminar</button>
-          </div>
+        <div>
+          <div class="spm-section-title">Detalles</div>
+          <div class="spm-detail" id="detail-panel"></div>
         </div>
       </div>
-
-      <!-- Tarjeta para crear nuevo prompt -->
-      <div class="prompt-card-new" id="btn-card-new">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 4v16M4 12h16" stroke="#4a6278"
-            stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span>Nuevo prompt</span>
-      </div>
-
     </div>
+  </div>
 
-  </main>
+  <script>
+    const NAV = ["Dashboard","Tus prompts","Historial","Extensión","Ajustes"];
+    const PROMPTS = [
+      {id:1, icon:"ti-search", name:"Plantilla de correo",
+       tags:["Trabajo","Emails","Ventas B2B"],
+       tagBg:["#F5E0A0","#B8E6C8","#D4C0E8"],
+       tagColor:["#7A5F10","#1A6635","#5A3585"],
+       last:"hace 2 días",
+       desc:"Secuencia de correo frío diseñada para captar la atención de tomadores de decisiones en el sector tecnológico."},
+      {id:2, icon:"ti-user", name:"Plantilla de ciberseguridad",
+       tags:["Tech","Security","Análisis"],
+       tagBg:["#B5D4F4","#F5E0A0","#B8E6C8"],
+       tagColor:["#0C447C","#7A5F10","#1A6635"],
+       last:"hace 5 días",
+       desc:"Prompt especializado para análisis de vulnerabilidades y detección de amenazas en sistemas de información."},
+      {id:3, icon:"ti-list-details", name:"Optimizar código",
+       tags:["Código","Dev","Refactor"],
+       tagBg:["#B8E6C8","#B5D4F4","#F5E0A0"],
+       tagColor:["#1A6635","#0C447C","#7A5F10"],
+       last:"hace 1 semana",
+       desc:"Optimiza y refactoriza código con buenas prácticas, mejora el rendimiento y asegura la legibilidad."}
+    ];
 
-  <!-- Vinculamos el JavaScript al final del body -->
-  <!-- Siempre va aquí abajo, nunca en el <head> -->
-  <script src="dashboard.js"></script>
+    let activeNav = "Dashboard";
+    let selectedId = 1;
+
+    function renderNav() {
+      const nav = document.getElementById("sidenav");
+      nav.innerHTML = NAV.map(item =>
+        `<div class="spm-nav-item${item===activeNav?' active':''}" data-nav="${item}" role="menuitem" tabindex="0">${item}</div>`
+      ).join("");
+      nav.querySelectorAll(".spm-nav-item").forEach(el =>
+        el.addEventListener("click", () => { activeNav = el.dataset.nav; renderNav(); })
+      );
+    }
+
+    function renderPrompts() {
+      const list = document.getElementById("prompts-list");
+      list.innerHTML = PROMPTS.map(p =>
+        `<div class="spm-prompt-item${p.id===selectedId?' sel':''}" data-id="${p.id}" role="button" tabindex="0">
+          <i class="ti ${p.icon}" aria-hidden="true" style="font-size:16px;color:#5C7FA3;flex-shrink:0"></i>
+          ${p.name}
+        </div>`
+      ).join("");
+      list.querySelectorAll(".spm-prompt-item").forEach(el =>
+        el.addEventListener("click", () => { selectedId = +el.dataset.id; renderPrompts(); renderDetail(); })
+      );
+    }
+
+    function renderDetail() {
+      const p = PROMPTS.find(x => x.id === selectedId);
+      const panel = document.getElementById("detail-panel");
+      const tags = p.tags.map((t,i) =>
+        `<span class="spm-tag" style="background:${p.tagBg[i]};color:${p.tagColor[i]}">${t}</span>`
+      ).join("");
+      panel.innerHTML = `
+        <div style="font-size:11px;color:#5A7291;margin-bottom:9px">Última vez utilizado: ${p.last}</div>
+        <div style="margin-bottom:10px">${tags}</div>
+        <p style="font-size:12px;color:#2A3A4A;line-height:1.55;margin:0 0 14px">${p.desc}</p>
+        <div style="display:flex;gap:7px;justify-content:flex-end">
+          <button class="spm-btn spm-btn-ghost">Eliminar</button>
+          <button class="spm-btn spm-btn-dark">Ir al prompt</button>
+        </div>`;
+    }
+
+    renderNav();
+    renderPrompts();
+    renderDetail();
+  </script>
 
 </body>
 </html>
