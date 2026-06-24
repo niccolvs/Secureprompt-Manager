@@ -6,10 +6,40 @@
   <meta name="description" content="Dashboard del Secure Prompt Manager — gestiona tu historial, estadísticas y prompts guardados de forma segura." />
   <title>Dashboard — SecurePrompt Manager</title>
 
-  <!-- Tabler Icons (necesarios para los íconos ti-*) -->
+  <!-- Tabler Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-
   <link rel="stylesheet" href="dashboard.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <!-- Guard: redirige a login si no hay sesión activa -->
+  <script>
+    const _cfg = {
+      apiKey: "AIzaSyCfJornBnJQnMU0r2qjBOUTTjG2i82ATgw",
+      authDomain: "prompt-manager-1f2c5.firebaseapp.com",
+      projectId: "prompt-manager-1f2c5",
+      storageBucket: "prompt-manager-1f2c5.firebasestorage.app",
+      messagingSenderId: "1059291715077",
+      appId: "1:1059291715077:web:580fd43dfe54888f9f2e6c"
+    };
+    firebase.initializeApp(_cfg);
+    const _auth = firebase.auth();
+
+    // Ocultar el body hasta confirmar sesión (evita flash de contenido)
+    document.documentElement.style.visibility = "hidden";
+
+    _auth.onAuthStateChanged((user) => {
+      if (!user) {
+        // No hay sesión → volver al login
+        window.location.replace("login.html");
+      } else {
+        // Hay sesión → mostrar el dashboard
+        document.documentElement.style.visibility = "";
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -25,7 +55,7 @@
         <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager" style="max-width:140px;height:auto;display:block" />
       </div>
       <nav id="sidenav" aria-label="Navegación principal"></nav>
-      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesión">
+      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesión" id="btn-logout">
         <i class="ti ti-logout" aria-hidden="true" style="font-size:16px"></i>
         Cerrar sesión
       </div>
@@ -148,6 +178,13 @@
     renderNav();
     renderPrompts();
     renderDetail();
+
+    // ── Cerrar sesión ─────────────────────────────
+    document.getElementById("btn-logout").addEventListener("click", () => {
+      _auth.signOut().then(() => {
+        window.location.replace("login.html");
+      });
+    });
   </script>
 
 </body>

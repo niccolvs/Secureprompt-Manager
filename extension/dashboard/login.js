@@ -1,9 +1,6 @@
-// login.js — Autenticación con Google via Firebase
-// Mismo Firebase que usamos en la app Android
+// login.js — Autenticación con Google y Email/Password via Firebase
 
 // ── Configuración de Firebase ─────────────────────
-// Estos datos los encuentras en Firebase Console
-// Configuración del proyecto → General → Tu app web
 const firebaseConfig = {
   apiKey: "AIzaSyCfJornBnJQnMU0r2qjBOUTTjG2i82ATgw",
   authDomain: "prompt-manager-1f2c5.firebaseapp.com",
@@ -18,6 +15,23 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
 
+// ── Helper: mostrar error ─────────────────────────
+function showError(msg) {
+  let el = document.getElementById("error-msg");
+  if (!el) {
+    el = document.createElement("p");
+    el.id = "error-msg";
+    el.style.cssText = "color:#c0392b;font-size:13px;text-align:center;margin-top:12px";
+    document.querySelector(".form-wrapper").appendChild(el);
+  }
+  el.textContent = msg;
+}
+
+function clearError() {
+  const el = document.getElementById("error-msg");
+  if (el) el.textContent = "";
+}
+
 // ── Verificar si ya está autenticado ──────────────
 // Si el usuario ya inició sesión antes lo mandamos
 // directo al dashboard sin pasar por el login
@@ -27,15 +41,29 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// ── Botón Google ──────────────────────────────────
-document.getElementById("btn-google").addEventListener("click", async () => {
-  const errorMsg = document.getElementById("error-msg");
-  errorMsg.textContent = "";
+// ── Formulario Email / Contraseña ─────────────────
+document.querySelector("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearError();
 
+  const email    = document.querySelector('input[type="email"]').value.trim();
+  const password = document.querySelector('input[type="password"]').value;
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    // onAuthStateChanged detectará el cambio y redirigirá
+  } catch (error) {
+    showError("Error al iniciar sesión: " + error.message);
+  }
+});
+
+// ── Botón Google ──────────────────────────────────
+document.querySelector(".btn-google").addEventListener("click", async () => {
+  clearError();
   try {
     await auth.signInWithPopup(provider);
     // onAuthStateChanged detectará el cambio y redirigirá
   } catch (error) {
-    errorMsg.textContent = "Error al iniciar sesión: " + error.message;
+    showError("Error con Google: " + error.message);
   }
 });
