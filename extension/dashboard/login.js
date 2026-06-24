@@ -10,10 +10,14 @@ const firebaseConfig = {
   appId: "1:1059291715077:web:580fd43dfe54888f9f2e6c"
 };
 
+// ID de cliente OAuth de tu proyecto (Google Cloud Console)
+// Consola Firebase → Configuración del proyecto → General → Tus apps → OAuth 2.0
+// También en: console.cloud.google.com → APIs → Credenciales → ID de cliente web
+const GOOGLE_CLIENT_ID = "1059291715077-REEMPLAZA_CON_TU_CLIENT_ID.apps.googleusercontent.com";
+
 // ── Inicializar Firebase ──────────────────────────
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
 
 // ── Helper: mostrar error ─────────────────────────
 function showError(msg) {
@@ -57,12 +61,56 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   }
 });
 
-// ── Botón Google ──────────────────────────────────
+// ── Botón Google ─────────────────────────────────
+// Detecta si corre como extensión de Chrome o en navegador normal
 document.querySelector(".btn-google").addEventListener("click", async () => {
   clearError();
+
+  const isExtension = typeof chrome !== "undefined"
+    && chrome.runtime
+    && chrome.runtime.id
+    && typeof chrome.identity !== "undefined";
+
   try {
-    await auth.signInWithPopup(provider);
+    if (isExtension) {
+      // ── Modo extensión: chrome.identity.launchWebAuthFlow ──
+      const redirectUri = `https://${chrome.runtime.id}.chromiumapp.org/`;
+      const nonce = Math.random().toString(36).substring(2);
+
+      const authUrl = new URL("https://accounts.google.com/o/oauth2/auth");
+      authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
+      authUrl.searchParams.set("response_type", "id_token");
+      authUrl.searchParams.set("redirect_uri", redirectUri);
+      authUrl.searchParams.set("scope", "openid email profile");
+      authUrl.searchParams.set("nonce", nonce);
+
+      const responseUrl = await new Promise((resolve, reject) => {
+        chrome.identity.launchWebAuthFlow(
+          { url: authUrl.toString(), interactive: true },
+          (url) => {
+            if (chrome.runtime.lastError || !url) {
+              reject(new Error(chrome.runtime.lastError?.message || "Cancelado por el usuario"));
+            } else {
+              resolve(url);
+            }
+          }
+        );
+      });
+
+      const params = new URLSearchParams(new URL(responseUrl).hash.slice(1));
+      const idToken = params.get("id_token");
+      if (!idToken) throw new Error("No se recibió token de Google.");
+
+      const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+      await auth.signInWithCredential(credential);
+
+    } else {
+      // ── Modo navegador (Live Server / http) : signInWithPopup ──
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithPopup(provider);
+    }
     // onAuthStateChanged detectará el cambio y redirigirá
+
   } catch (error) {
     showError("Error con Google: " + error.message);
   }

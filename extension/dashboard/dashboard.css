@@ -8,16 +8,16 @@
 body {
   font-family: system-ui, sans-serif;
   background: #EFF4FA;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ── Layout principal ── */
 .spm-root {
   display: flex;
-  height: 580px;
+  height: 100vh;
   background: #EFF4FA;
-  border-radius: 12px;
   overflow: hidden;
-  border: 0.5px solid #C0D4E8;
 }
 
 /* ── Sidebar ── */
