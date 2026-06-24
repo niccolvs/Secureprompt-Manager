@@ -35,7 +35,17 @@
         // No hay sesión → volver al login
         window.location.replace("login.html");
       } else {
-        // Hay sesión → mostrar el dashboard
+        // Hay sesión → poblar datos del usuario
+        const firstName = (user.displayName || user.email).split(/[ @]/)[0];
+        const initials  = (user.displayName || user.email)
+          .split(" ").slice(0, 2).map(w => w[0].toUpperCase()).join("");
+
+        document.getElementById("greeting").textContent   = `Hola, ${firstName}!`;
+        document.getElementById("user-name").textContent  = user.displayName || user.email;
+        document.getElementById("user-email").textContent = user.email;
+        document.getElementById("user-avatar").textContent = initials;
+
+        // Mostrar el dashboard
         document.documentElement.style.visibility = "";
       }
     });
@@ -64,14 +74,14 @@
     <!-- ── Contenido principal ── -->
     <div class="spm-main">
       <div class="spm-topbar">
-        <h1 class="spm-title">Hola, Olivia!</h1>
+        <h1 class="spm-title" id="greeting">Hola!</h1>
         <div class="spm-user">
           <i class="ti ti-bell" aria-hidden="true" style="font-size:18px;color:#6A8099"></i>
           <div style="text-align:right">
-            <div style="font-size:13px;font-weight:500;color:#1C2B3A">Olivia Wallace</div>
-            <div style="font-size:11px;color:#6A8099">olivia.wallace@gmail.com</div>
+            <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
+            <div style="font-size:11px;color:#6A8099" id="user-email"></div>
           </div>
-          <div class="spm-avatar" aria-label="Avatar de Olivia Wallace">OW</div>
+          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario"></div>
         </div>
       </div>
 
