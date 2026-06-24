@@ -15,6 +15,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
   <!-- Guard: redirige a login si no hay sesión activa -->
   <script>
@@ -28,6 +29,7 @@
     };
     firebase.initializeApp(_cfg);
     const _auth = firebase.auth();
+    const _storage = firebase.storage();
 
     // Ocultar el body hasta confirmar sesión (evita flash de contenido)
     document.documentElement.style.visibility = "hidden";
@@ -46,11 +48,21 @@
         document.getElementById("user-name").textContent = user.displayName || user.email;
         document.getElementById("user-email").textContent = user.email;
         
+        // Perfil grande
+        document.getElementById("profile-name").textContent = user.displayName || user.email;
+        document.getElementById("profile-email-lbl").textContent = user.email;
+        
         const avatarEl = document.getElementById("user-avatar");
+        const profileAvatarEl = document.getElementById("profile-avatar");
         if (user.photoURL) {
-          avatarEl.innerHTML = `<img src="${user.photoURL}" alt="Foto de ${firstName}">`;
+          const imgHtml = `<img src="${user.photoURL}" alt="Foto de ${firstName}" style="width:100%;height:100%;object-fit:cover;">`;
+          avatarEl.innerHTML = imgHtml;
+          profileAvatarEl.innerHTML = imgHtml;
+          profileAvatarEl.classList.remove("avatar-initials");
         } else {
           avatarEl.textContent = initials;
+          profileAvatarEl.textContent = initials;
+          profileAvatarEl.classList.add("avatar-initials");
         }
 
         // Mostrar el dashboard
@@ -90,11 +102,13 @@
             <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
             <div style="font-size:11px;color:#6A8099" id="user-email"></div>
           </div>
-          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;" onclick="window.location.href='perfil.html'"></div>
+          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;" onclick="activeNav='Perfil'; renderNav();"></div>
         </div>
       </div>
 
-      <h2 class="spm-h2">Dashboard</h2>
+      <!-- VISTA DASHBOARD -->
+      <div id="view-dashboard" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+        <h2 class="spm-h2">Dashboard</h2>
 
       <!-- ── Fila superior: Historial + Estadísticas ── -->
       <div class="spm-grid">
@@ -131,6 +145,37 @@
           <div class="spm-detail" id="detail-panel"></div>
         </div>
       </div>
+      </div> <!-- Fin VISTA DASHBOARD -->
+
+      <!-- VISTA PERFIL -->
+      <div id="view-perfil" style="display: none; align-items: center; justify-content: center; gap: 60px; flex: 1;">
+        <section class="profile-section">
+          <div class="avatar-wrapper">
+            <div class="avatar-circle" id="profile-avatar"></div>
+            <div class="camera-badge" id="btn-camera" title="Cambiar foto">
+              <i class="ti ti-camera"></i>
+            </div>
+            <input type="file" id="avatar-upload" accept="image/png, image/jpeg, image/webp" style="display: none;">
+          </div>
+          <h1 class="profile-name" id="profile-name"></h1>
+          <p class="profile-email" id="profile-email-lbl"></p>
+          <div class="profile-actions">
+            <button class="btn-outline">Editar perfil</button>
+            <button class="btn-outline">Ajustes</button>
+          </div>
+        </section>
+
+        <section class="linked-accounts-card">
+          <h2 class="card-title">Cuentas enlazadas</h2>
+          <div class="account-list">
+            <div class="account-item"><span>ChatGPT</span><div class="toggle-switch"></div></div>
+            <div class="account-item"><span>Gemini</span><div class="toggle-switch"></div></div>
+            <div class="account-item"><span>Claude</span><div class="toggle-switch"></div></div>
+            <div class="account-item"><span>Deepseek</span><div class="toggle-switch"></div></div>
+            <div class="account-item"><span>Manus</span><div class="toggle-switch"></div></div>
+          </div>
+        </section>
+      </div> <!-- Fin VISTA PERFIL -->
     </div>
   </div>
 
@@ -173,15 +218,19 @@
       ).join("");
       nav.querySelectorAll(".spm-nav-item").forEach(el =>
         el.addEventListener("click", () => {
-          const target = el.dataset.nav;
-          if (target === "Perfil") {
-            window.location.href = "perfil.html";
-          } else {
-            activeNav = target;
-            renderNav();
-          }
+          activeNav = el.dataset.nav;
+          renderNav();
         })
       );
+
+      // Mostrar/Ocultar vistas
+      if (activeNav === "Perfil") {
+        document.getElementById("view-dashboard").style.display = "none";
+        document.getElementById("view-perfil").style.display = "flex";
+      } else {
+        document.getElementById("view-dashboard").style.display = "flex";
+        document.getElementById("view-perfil").style.display = "none";
+      }
     }
 
     function renderPrompts() {
@@ -223,8 +272,51 @@
         window.location.replace("login.html");
       });
     });
+
+    // ── Cambiar foto de perfil ────────────────────
+    const btnCamera = document.getElementById("btn-camera");
+    const avatarUpload = document.getElementById("avatar-upload");
+
+    btnCamera.addEventListener("click", () => {
+      avatarUpload.click();
+    });
+
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const user = _auth.currentUser;
+      if (!user) return;
+
+      try {
+        const profileAvatarEl = document.getElementById("profile-avatar");
+        const topAvatarEl = document.getElementById("user-avatar");
+        
+        profileAvatarEl.innerHTML = '<i class="ti ti-loader" style="animation: spin 1s linear infinite;"></i>';
+
+        const storageRef = _storage.ref();
+        const avatarRef = storageRef.child(`avatars/${user.uid}`);
+        await avatarRef.put(file);
+        const downloadURL = await avatarRef.getDownloadURL();
+        await user.updateProfile({ photoURL: downloadURL });
+
+        const imgHtml = `<img src="${downloadURL}" alt="Foto de perfil" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        profileAvatarEl.innerHTML = imgHtml;
+        profileAvatarEl.classList.remove("avatar-initials");
+        topAvatarEl.innerHTML = imgHtml;
+      } catch (error) {
+        console.error("Error al subir imagen:", error);
+        alert("Hubo un error al subir la imagen. Verifica los permisos de Firebase Storage.");
+      }
+    });
   </script>
 
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </body>
 
 </html>
