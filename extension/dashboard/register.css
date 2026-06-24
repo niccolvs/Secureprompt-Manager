@@ -18,10 +18,6 @@ body {
 .left-panel {
     flex: 0 0 42%;
     background-color: #1e3b61;
-    /* Fondo azul de respaldo */
-
-    /* REEMPLAZA LA IMAGEN AQUÍ */
-    /* Descomenta la siguiente línea y pon la ruta de tu imagen */
     background-image: url('../assets/login/login_image.jpg');
 
     background-size: cover;
@@ -62,7 +58,6 @@ body {
 .form-wrapper {
     width: 100%;
     max-width: 440px;
-    /* Un poco más ancho para los inputs dobles */
     padding: 20px;
 }
 
@@ -91,7 +86,6 @@ body {
     padding: 14px 18px;
     border: 1px solid #9ca3af;
     border-radius: 12px;
-    /* Bordes redondeados según diseño */
     font-size: 14px;
     color: #333;
     outline: none;
