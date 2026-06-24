@@ -108,6 +108,13 @@ body {
   color: #fff;
   font-weight: 500;
   font-size: 13px;
+  overflow: hidden;
+}
+
+.spm-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ── Títulos de sección ── */

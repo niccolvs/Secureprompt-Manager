@@ -45,7 +45,13 @@
         document.getElementById("greeting").textContent = `Hola, ${firstName}!`;
         document.getElementById("user-name").textContent = user.displayName || user.email;
         document.getElementById("user-email").textContent = user.email;
-        document.getElementById("user-avatar").textContent = initials;
+        
+        const avatarEl = document.getElementById("user-avatar");
+        if (user.photoURL) {
+          avatarEl.innerHTML = `<img src="${user.photoURL}" alt="Foto de ${firstName}">`;
+        } else {
+          avatarEl.textContent = initials;
+        }
 
         // Mostrar el dashboard
         document.documentElement.style.visibility = "";
@@ -84,7 +90,7 @@
             <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
             <div style="font-size:11px;color:#6A8099" id="user-email"></div>
           </div>
-          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario"></div>
+          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;" onclick="window.location.href='perfil.html'"></div>
         </div>
       </div>
 

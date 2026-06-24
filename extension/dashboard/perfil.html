@@ -15,6 +15,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
   <!-- Guard: redirige a login si no hay sesión activa -->
   <script>
@@ -28,6 +29,7 @@
     };
     firebase.initializeApp(_cfg);
     const _auth = firebase.auth();
+    const _storage = firebase.storage();
 
     // Ocultar hasta confirmar sesión
     document.documentElement.style.visibility = "hidden";
@@ -87,9 +89,10 @@
     <section class="profile-section">
       <div class="avatar-wrapper">
         <div class="avatar-circle" id="profile-avatar"></div>
-        <div class="camera-badge" title="Cambiar foto">
+        <div class="camera-badge" id="btn-camera" title="Cambiar foto">
           <i class="ti ti-camera"></i>
         </div>
+        <input type="file" id="avatar-upload" accept="image/png, image/jpeg, image/webp" style="display: none;">
       </div>
 
       <h1 class="profile-name" id="profile-name"></h1>
@@ -137,8 +140,56 @@
         window.location.replace("login.html");
       });
     });
+
+    // ── Cambiar foto de perfil ────────────────────
+    const btnCamera = document.getElementById("btn-camera");
+    const avatarUpload = document.getElementById("avatar-upload");
+
+    btnCamera.addEventListener("click", () => {
+      avatarUpload.click(); // Abre el selector de archivos
+    });
+
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const user = _auth.currentUser;
+      if (!user) return;
+
+      try {
+        // Opcional: mostrar estado de "cargando"
+        const avatarEl = document.getElementById("profile-avatar");
+        const originalContent = avatarEl.innerHTML;
+        avatarEl.innerHTML = '<i class="ti ti-loader" style="animation: spin 1s linear infinite;"></i>';
+
+        // 1. Subir a Firebase Storage
+        const storageRef = _storage.ref();
+        const avatarRef = storageRef.child(`avatars/${user.uid}`);
+        await avatarRef.put(file);
+
+        // 2. Obtener URL pública
+        const downloadURL = await avatarRef.getDownloadURL();
+
+        // 3. Actualizar perfil de Auth
+        await user.updateProfile({ photoURL: downloadURL });
+
+        // 4. Actualizar la UI
+        avatarEl.innerHTML = `<img src="${downloadURL}" alt="Foto de perfil" class="avatar-img">`;
+        avatarEl.classList.remove("avatar-initials");
+
+      } catch (error) {
+        console.error("Error al subir imagen:", error);
+        alert("Hubo un error al subir la imagen. Verifica los permisos de Firebase Storage.");
+      }
+    });
   </script>
 
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </body>
 
 </html>
