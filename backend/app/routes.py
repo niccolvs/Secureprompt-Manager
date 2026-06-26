@@ -5,6 +5,7 @@ from app.models import PromptCreate, HistorialCreate
 from app.database import get_connection
 from datetime import datetime
 from app.ner import analizar_prompt
+import random
 
 router = APIRouter()
 
@@ -17,10 +18,36 @@ def obtener_prompts():
 
     # Trae todos los prompts ordenados por más reciente
     cursor.execute("SELECT * FROM prompts ORDER BY id DESC")
-    prompts = [dict(row) for row in cursor.fetchall()]
+    prompts_rows = cursor.fetchall()
+    
+    prompts = []
+    for row in prompts_rows:
+        prompt_dict = dict(row)
+        # Fetch tags for this prompt
+        cursor.execute("""
+            SELECT t.id, t.nombre, t.color 
+            FROM tags t 
+            JOIN prompt_tags pt ON t.id = pt.tag_id 
+            WHERE pt.prompt_id = ?
+        """, (prompt_dict["id"],))
+        prompt_dict["tags"] = [dict(t) for t in cursor.fetchall()]
+        prompts.append(prompt_dict)
 
     conn.close()
     return {"prompts": prompts}
+
+# ── COLORES PARA TAGS ─────────────────────────────
+TAG_COLORS = ["#F4E8D1", "#D1E8D1", "#F4D1D1", "#D1D1E8", "#E8D1F4", "#D1F4F4", "#F4F4D1"]
+
+# ── GET /tags ─────────────────────────────────────
+@router.get("/tags")
+def obtener_tags():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tags ORDER BY nombre ASC")
+    tags = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return tags
 
 # ── POST /prompts ─────────────────────────────────
 # Analiza el prompt con SpaCy y guarda todo en SQLite
@@ -53,6 +80,22 @@ def crear_prompt(prompt: PromptCreate):
             INSERT INTO tokens (prompt_id, token, valor_real, tipo)
             VALUES (?, ?, ?, ?)
         """, (prompt_id, token, datos["valor_real"], datos["tipo"]))
+
+    # 4. Guardar etiquetas (Tags)
+    for tag_name in prompt.tags:
+        # Check si existe
+        cursor.execute("SELECT id FROM tags WHERE nombre = ?", (tag_name,))
+        tag_row = cursor.fetchone()
+        if tag_row:
+            tag_id = tag_row["id"]
+        else:
+            # Crear nuevo tag con color aleatorio predefinido
+            color = random.choice(TAG_COLORS)
+            cursor.execute("INSERT INTO tags (nombre, color) VALUES (?, ?)", (tag_name, color))
+            tag_id = cursor.lastrowid
+        
+        # Vincular
+        cursor.execute("INSERT INTO prompt_tags (prompt_id, tag_id) VALUES (?, ?)", (prompt_id, tag_id))
 
     conn.commit()
     conn.close()

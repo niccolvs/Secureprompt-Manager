@@ -44,6 +44,25 @@ def init_db():
     except sqlite3.OperationalError:
         pass # La columna ya existe
 
+    # Tablas para el sistema de Etiquetas (Tags)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tags (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre      TEXT NOT NULL UNIQUE,
+            color       TEXT NOT NULL DEFAULT '#E0E0E0'
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prompt_tags (
+            prompt_id   INTEGER NOT NULL,
+            tag_id      INTEGER NOT NULL,
+            PRIMARY KEY (prompt_id, tag_id),
+            FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE,
+            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+        )
+    """)
+
     # Tabla nueva — guarda el mapa token → dato real
     # Cada token está relacionado con un prompt por prompt_id
     cursor.execute("""
