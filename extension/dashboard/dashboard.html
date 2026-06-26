@@ -115,26 +115,26 @@
       <div id="view-dashboard" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
         <h2 class="spm-h2">Dashboard</h2>
 
+        <!-- Banner de error de conexión (oculto por defecto) -->
+        <div id="conn-error" class="spm-conn-error" style="display:none">
+          <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+          <span>No se pudo conectar al servidor. Asegúrate de que FastAPI esté corriendo en <strong>localhost:8000</strong></span>
+          <button class="error-dismiss" onclick="this.parentElement.style.display='none'" aria-label="Cerrar">&times;</button>
+        </div>
+
       <!-- ── Fila superior: Historial + Estadísticas ── -->
       <div class="spm-grid">
         <div>
           <div class="spm-section-title">Historial</div>
-          <div class="spm-hist">
-            <div class="spm-hist-row"><span style="font-weight:700;width:68px">Gemini</span><span
-                style="flex:1">14-05</span><span>15:32</span></div>
-            <div class="spm-hist-row"><span style="font-weight:700;width:68px">Gemini</span><span
-                style="flex:1">12-05</span><span>17:32</span></div>
-            <div class="spm-hist-row"><span style="font-weight:700;width:68px">Claude</span><span
-                style="flex:1">12-05</span><span>16:56</span></div>
-          </div>
+          <div class="spm-hist" id="historial-panel"></div>
         </div>
         <div>
           <div class="spm-section-title">Estadísticas de uso</div>
           <div class="spm-stats">
-            <div class="spm-stat-row"><span class="spm-stat-lbl">Censuras</span><span class="spm-stat-num">3</span>
+            <div class="spm-stat-row"><span class="spm-stat-lbl">Censuras</span><span class="spm-stat-num" id="stat-censuras">0</span>
             </div>
             <div class="spm-stat-row"><span class="spm-stat-lbl">Plantillas usadas</span><span
-                class="spm-stat-num">1</span></div>
+                class="spm-stat-num" id="stat-plantillas">0</span></div>
           </div>
         </div>
       </div>
@@ -185,37 +185,15 @@
   </div>
 
   <script>
+    // ── Configuración ─────────────────────────────
+    const API_URL = "http://127.0.0.1:8000";
     const NAV = ["Dashboard", "Tus prompts", "Historial", "Extensión", "Perfil"];
-    const PROMPTS = [
-      {
-        id: 1, icon: "ti-search", name: "Plantilla de correo",
-        tags: ["Trabajo", "Emails", "Ventas B2B"],
-        tagBg: ["#F5E0A0", "#B8E6C8", "#D4C0E8"],
-        tagColor: ["#7A5F10", "#1A6635", "#5A3585"],
-        last: "hace 2 días",
-        desc: "Secuencia de correo frío diseñada para captar la atención de tomadores de decisiones en el sector tecnológico."
-      },
-      {
-        id: 2, icon: "ti-user", name: "Plantilla de ciberseguridad",
-        tags: ["Tech", "Security", "Análisis"],
-        tagBg: ["#B5D4F4", "#F5E0A0", "#B8E6C8"],
-        tagColor: ["#0C447C", "#7A5F10", "#1A6635"],
-        last: "hace 5 días",
-        desc: "Prompt especializado para análisis de vulnerabilidades y detección de amenazas en sistemas de información."
-      },
-      {
-        id: 3, icon: "ti-list-details", name: "Optimizar código",
-        tags: ["Código", "Dev", "Refactor"],
-        tagBg: ["#B8E6C8", "#B5D4F4", "#F5E0A0"],
-        tagColor: ["#1A6635", "#0C447C", "#7A5F10"],
-        last: "hace 1 semana",
-        desc: "Optimiza y refactoriza código con buenas prácticas, mejora el rendimiento y asegura la legibilidad."
-      }
-    ];
 
     let activeNav = "Dashboard";
-    let selectedId = 1;
+    let selectedId = null;
+    let promptsData = [];
 
+    // ── Navegación ────────────────────────────────
     function renderNav() {
       const nav = document.getElementById("sidenav");
       nav.innerHTML = NAV.map(item =>
@@ -238,38 +216,180 @@
       }
     }
 
+    // ── Fetch datos del backend ───────────────────
+    async function fetchPrompts() {
+      try {
+        const res = await fetch(`${API_URL}/prompts`);
+        if (!res.ok) throw new Error("Error del servidor");
+        const data = await res.json();
+        promptsData = data.prompts || [];
+        selectedId = promptsData.length > 0 ? promptsData[0].id : null;
+        renderPrompts();
+        renderDetail();
+        hideConnError();
+      } catch (err) {
+        console.error("Error cargando prompts:", err);
+        promptsData = [];
+        selectedId = null;
+        renderPrompts();
+        renderDetail();
+        showConnError();
+      }
+    }
+
+    async function fetchStats() {
+      try {
+        const res = await fetch(`${API_URL}/stats`);
+        if (!res.ok) throw new Error("Error del servidor");
+        const data = await res.json();
+        const censurasEl = document.getElementById("stat-censuras");
+        const plantillasEl = document.getElementById("stat-plantillas");
+        censurasEl.textContent = data.total_censuras || 0;
+        plantillasEl.textContent = data.plantillas_usadas || 0;
+        censurasEl.classList.add("spm-fade-in");
+        plantillasEl.classList.add("spm-fade-in");
+      } catch (err) {
+        console.error("Error cargando stats:", err);
+        document.getElementById("stat-censuras").textContent = "0";
+        document.getElementById("stat-plantillas").textContent = "0";
+      }
+    }
+
+    async function fetchHistorial() {
+      try {
+        const res = await fetch(`${API_URL}/historial`);
+        if (!res.ok) throw new Error("Error del servidor");
+        const data = await res.json();
+        renderHistorial(data.historial || []);
+      } catch (err) {
+        console.error("Error cargando historial:", err);
+        renderHistorial([]);
+      }
+    }
+
+    // ── Render: Historial ─────────────────────────
+    function renderHistorial(historial) {
+      const panel = document.getElementById("historial-panel");
+
+      if (historial.length === 0) {
+        panel.innerHTML = `
+          <div class="spm-empty-state">
+            <i class="ti ti-history" aria-hidden="true"></i>
+            <span class="empty-title">Sin actividad reciente</span>
+            <span class="empty-sub">Aquí aparecerá el registro de tus interacciones con las IAs</span>
+          </div>`;
+        return;
+      }
+
+      panel.innerHTML = historial.map(h => `
+        <div class="spm-hist-row spm-fade-in">
+          <span style="font-weight:700;width:68px">${h.plataforma}</span>
+          <span style="flex:1">${h.fecha}</span>
+          <span>${h.hora}</span>
+        </div>
+      `).join("");
+    }
+
+    // ── Render: Prompts ───────────────────────────
     function renderPrompts() {
       const list = document.getElementById("prompts-list");
-      list.innerHTML = PROMPTS.map(p =>
-        `<div class="spm-prompt-item${p.id === selectedId ? ' sel' : ''}" data-id="${p.id}" role="button" tabindex="0">
-          <i class="ti ${p.icon}" aria-hidden="true" style="font-size:16px;color:#5C7FA3;flex-shrink:0"></i>
-          ${p.name}
+
+      if (promptsData.length === 0) {
+        list.innerHTML = `
+          <div class="spm-empty-state spm-fade-in">
+            <i class="ti ti-file-text" aria-hidden="true"></i>
+            <span class="empty-title">Aún no tienes plantillas guardadas</span>
+            <span class="empty-sub">Crea tu primer prompt desde la sección "Tus prompts" o desde la extensión del navegador</span>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = promptsData.map(p =>
+        `<div class="spm-prompt-item spm-fade-in${p.id === selectedId ? ' sel' : ''}" data-id="${p.id}" role="button" tabindex="0">
+          <i class="ti ti-file-text" aria-hidden="true" style="font-size:16px;color:#5C7FA3;flex-shrink:0"></i>
+          ${p.titulo}
         </div>`
       ).join("");
+
       list.querySelectorAll(".spm-prompt-item").forEach(el =>
         el.addEventListener("click", () => { selectedId = +el.dataset.id; renderPrompts(); renderDetail(); })
       );
     }
 
+    // ── Render: Detalle ───────────────────────────
     function renderDetail() {
-      const p = PROMPTS.find(x => x.id === selectedId);
       const panel = document.getElementById("detail-panel");
-      const tags = p.tags.map((t, i) =>
-        `<span class="spm-tag" style="background:${p.tagBg[i]};color:${p.tagColor[i]}">${t}</span>`
-      ).join("");
+
+      if (!selectedId || promptsData.length === 0) {
+        panel.innerHTML = `
+          <div class="spm-empty-state">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span class="empty-title">Selecciona un prompt</span>
+            <span class="empty-sub">Haz clic en uno de tus prompts para ver sus detalles aquí</span>
+          </div>`;
+        return;
+      }
+
+      const p = promptsData.find(x => x.id === selectedId);
+      if (!p) {
+        panel.innerHTML = `
+          <div class="spm-empty-state">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span class="empty-title">Selecciona un prompt</span>
+            <span class="empty-sub">Haz clic en uno de tus prompts para ver sus detalles aquí</span>
+          </div>`;
+        return;
+      }
+
+      const tag = `<span class="spm-tag" style="background:#B5D4F4;color:#0C447C">${p.categoria}</span>`;
       panel.innerHTML = `
-        <div style="font-size:11px;color:#5A7291;margin-bottom:9px">Última vez utilizado: ${p.last}</div>
-        <div style="margin-bottom:10px">${tags}</div>
-        <p style="font-size:12px;color:#2A3A4A;line-height:1.55;margin:0 0 14px">${p.desc}</p>
-        <div style="display:flex;gap:7px;justify-content:flex-end">
-          <button class="spm-btn spm-btn-ghost">Eliminar</button>
-          <button class="spm-btn spm-btn-dark">Ir al prompt</button>
+        <div class="spm-fade-in">
+          <div style="font-size:11px;color:#5A7291;margin-bottom:9px">Creado: ${p.fecha_creacion || '—'}</div>
+          <div style="margin-bottom:10px">${tag}</div>
+          <p style="font-size:12px;color:#2A3A4A;line-height:1.55;margin:0 0 14px">${p.contenido_limpio || p.contenido}</p>
+          <div style="display:flex;gap:7px;justify-content:flex-end">
+            <button class="spm-btn spm-btn-ghost" onclick="eliminarPrompt(${p.id})">Eliminar</button>
+            <button class="spm-btn spm-btn-dark" onclick="copiarPrompt('${(p.contenido_limpio || p.contenido).replace(/'/g, "\\'")}')">Copiar</button>
+          </div>
         </div>`;
     }
 
+    // ── Acciones ───────────────────────────────────
+    async function eliminarPrompt(id) {
+      if (!confirm("¿Estás seguro de que deseas eliminar este prompt?")) return;
+      try {
+        const res = await fetch(`${API_URL}/prompts/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          fetchPrompts();
+          fetchStats();
+        }
+      } catch (err) {
+        console.error("Error eliminando:", err);
+      }
+    }
+
+    function copiarPrompt(texto) {
+      navigator.clipboard.writeText(texto)
+        .then(() => alert("✅ Copiado al portapapeles"))
+        .catch(err => console.error("Error al copiar:", err));
+    }
+
+    // ── Error de conexión ─────────────────────────
+    function showConnError() {
+      document.getElementById("conn-error").style.display = "flex";
+    }
+
+    function hideConnError() {
+      document.getElementById("conn-error").style.display = "none";
+    }
+
+    // ── Inicialización ────────────────────────────
     renderNav();
-    renderPrompts();
-    renderDetail();
+
+    // Cargar datos del backend
+    fetchPrompts();
+    fetchStats();
+    fetchHistorial();
 
     // ── Cerrar sesión ─────────────────────────────
     document.getElementById("btn-logout").addEventListener("click", () => {

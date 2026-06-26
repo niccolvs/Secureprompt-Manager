@@ -22,3 +22,8 @@ class PromptResponse(BaseModel):
     contenido: str
     categoria: str
     fecha_creacion: str
+
+# ── Modelo para registrar historial ──────────────
+class HistorialCreate(BaseModel):
+    plataforma: str    # Ej: "ChatGPT", "Claude", "Gemini"
+    accion: str = "analisis"  # Tipo de acción realizada

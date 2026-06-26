@@ -50,6 +50,19 @@ def init_db():
         )
     """)
 
+    # Tabla de historial — registra cada uso de la extensión
+    # plataforma: ChatGPT, Claude, Gemini, etc.
+    # accion: "analisis" cuando se analiza un prompt
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS historial (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            plataforma  TEXT NOT NULL,
+            accion      TEXT NOT NULL DEFAULT 'analisis',
+            fecha       TEXT NOT NULL,
+            hora        TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
-    print("✅ Base de datos inicializada correctamente")
+    print("[OK] Base de datos inicializada correctamente")

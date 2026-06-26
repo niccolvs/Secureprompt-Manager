@@ -1,7 +1,7 @@
 # app/routes.py — Rutas usando SQLite
 
 from fastapi import APIRouter, HTTPException
-from app.models import PromptCreate
+from app.models import PromptCreate, HistorialCreate
 from app.database import get_connection
 from datetime import datetime
 from app.ner import analizar_prompt
@@ -119,3 +119,60 @@ def analizar(prompt: PromptCreate):
         "categoria": prompt.categoria,
         "analisis": resultado
     }
+
+# ── GET /stats ────────────────────────────────────
+# Devuelve estadísticas de uso del sistema
+@router.get("/stats")
+def obtener_stats():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Total de prompts guardados
+    cursor.execute("SELECT COUNT(*) as total FROM prompts")
+    total_prompts = cursor.fetchone()["total"]
+
+    # Total de censuras (tokens detectados)
+    cursor.execute("SELECT COUNT(*) as total FROM tokens")
+    total_censuras = cursor.fetchone()["total"]
+
+    conn.close()
+
+    return {
+        "total_prompts": total_prompts,
+        "total_censuras": total_censuras,
+        "plantillas_usadas": total_prompts
+    }
+
+# ── GET /historial ────────────────────────────────
+# Devuelve las últimas entradas del historial de uso
+@router.get("/historial")
+def obtener_historial():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM historial ORDER BY id DESC LIMIT 20")
+    historial = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+    return {"historial": historial}
+
+# ── POST /historial ───────────────────────────────
+# Registra un nuevo evento de uso desde la extensión
+@router.post("/historial")
+def registrar_historial(entry: HistorialCreate):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    ahora = datetime.now()
+    fecha = ahora.strftime("%d-%m")
+    hora = ahora.strftime("%H:%M")
+
+    cursor.execute("""
+        INSERT INTO historial (plataforma, accion, fecha, hora)
+        VALUES (?, ?, ?, ?)
+    """, (entry.plataforma, entry.accion, fecha, hora))
+
+    conn.commit()
+    conn.close()
+
+    return {"mensaje": "Historial registrado"}
