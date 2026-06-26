@@ -66,6 +66,11 @@ document.querySelector("form").addEventListener("submit", async (e) => {
 document.querySelector(".btn-google").addEventListener("click", async () => {
   clearError();
 
+  const btnGoogle = document.querySelector(".btn-google");
+  const originalHtml = btnGoogle.innerHTML;
+  btnGoogle.classList.add("loading");
+  btnGoogle.innerHTML = `<span class="google-loader"></span> Conectando con Google...`;
+
   const isExtension = typeof chrome !== "undefined"
     && chrome.runtime
     && chrome.runtime.id
@@ -113,5 +118,7 @@ document.querySelector(".btn-google").addEventListener("click", async () => {
 
   } catch (error) {
     showError("Error con Google: " + error.message);
+    btnGoogle.classList.remove("loading");
+    btnGoogle.innerHTML = originalHtml;
   }
 });
