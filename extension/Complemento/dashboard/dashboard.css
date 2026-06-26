@@ -1,3 +1,6 @@
+<<<<<<< HEAD:extension/dashboard/dashboard.css
+/* ── Reset mínimo ── */
+=======
 /* ================================================
    SECUREPROMPT MANAGER — Dashboard CSS
    Aprende qué hace cada sección con los comentarios
@@ -37,12 +40,433 @@
    padding no agrande el elemento sino que se reste
    del interior — mucho más predecible de manejar.
    ──────────────────────────────────────────────── */
+>>>>>>> ebc42c372207863eb3d18231cd37ba87e4f55919:extension/Complemento/dashboard/dashboard.css
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+<<<<<<< HEAD:extension/dashboard/dashboard.css
+body {
+  font-family: system-ui, sans-serif;
+  background: #EFF4FA;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Layout principal ── */
+.spm-root {
+  display: flex;
+  height: 100vh;
+  background: #EFF4FA;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.spm-sidebar {
+  width: 196px;
+  background: #5C7FA3;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 0;
+  flex-shrink: 0;
+}
+
+.spm-logo {
+  padding: 0 22px 26px;
+  color: #fff;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.spm-nav-item {
+  padding: 11px 22px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 400;
+  border-radius: 0 24px 24px 0;
+  margin-bottom: 2px;
+  transition: background .12s, color .12s;
+}
+
+.spm-nav-item.active {
+  background: #fff;
+  color: #2C3D58;
+  font-weight: 700;
+}
+
+.spm-logout {
+  padding: 12px 22px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  opacity: .9;
+  margin-top: auto;
+}
+
+/* ── Contenido principal ── */
+.spm-main {
+  flex: 1;
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.spm-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2px;
+}
+
+.spm-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 400;
+  color: #1C2B3A;
+}
+
+.spm-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spm-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #5C7FA3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 500;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.spm-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Títulos de sección ── */
+.spm-section-title {
+  font-size: 14px;
+  color: #1C2B3A;
+  margin-bottom: 8px;
+}
+
+.spm-h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 400;
+  color: #1C2B3A;
+}
+
+/* ── Grid de dos columnas ── */
+.spm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Historial ── */
+.spm-hist {
+  background: #2C3D58;
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+
+.spm-hist-row {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.spm-hist-row + .spm-hist-row {
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+/* ── Estadísticas ── */
+.spm-stats {
+  background: #fff;
+  border: 1.5px solid #C0D4E8;
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+
+.spm-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spm-stat-row + .spm-stat-row {
+  border-top: 1px solid #EEF2F8;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.spm-stat-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2C3D58;
+  line-height: 1;
+}
+
+.spm-stat-lbl {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2C3D58;
+}
+
+/* ── Lista de prompts ── */
+.spm-prompt-item {
+  background: #E8EFF8;
+  border-radius: 9px;
+  padding: 11px 15px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1C2B3A;
+  margin-bottom: 7px;
+  transition: background .12s;
+}
+
+.spm-prompt-item.sel {
+  background: #C4D8EE;
+  font-weight: 500;
+}
+
+/* ── Panel de detalle ── */
+.spm-detail {
+  background: #CEDFEE;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+/* ── Tags ── */
+.spm-tag {
+  border-radius: 20px;
+  padding: 3px 11px;
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-block;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+/* ── Botones ── */
+.spm-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.spm-btn-ghost {
+  background: rgba(255, 255, 255, .55);
+  color: #2C3D58;
+}
+
+.spm-btn-dark {
+  background: #2C3D58;
+  color: #fff;
+}
+
+/* ── Sección de perfil ───────────────────────────── */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 300px;
+  width: 100%;
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+/* Contenedor del avatar (foto o iniciales) */
+.avatar-circle {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background-color: #5C7FA3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  font-weight: 700;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.avatar-circle.avatar-initials {
+  background-color: #5C7FA3;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.camera-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.camera-badge:hover {
+  background-color: #f3f4f6;
+}
+
+.camera-badge i {
+  color: #4b5563;
+  font-size: 20px;
+}
+
+.profile-name {
+  font-size: 28px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.profile-email {
+  font-size: 16px;
+  color: #4b5563;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.btn-outline:hover {
+  background-color: #f9fafb;
+}
+
+/* ── Cuentas enlazadas ───────────────────────────── */
+.linked-accounts-card {
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 40px 30px;
+  width: 320px;
+  background-color: #ffffff;
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 30px;
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  color: #4b5563;
+}
+
+/* ── Toggle switch ───────────────────────────────── */
+.toggle-switch {
+  width: 46px;
+  height: 24px;
+  background-color: #4ade80;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: right 0.2s;
+}
+
+.toggle-switch::before {
+  content: '|';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.toggle-switch.off {
+  background-color: #d1d5db;
+}
+
+.toggle-switch.off::after {
+  right: auto;
+  left: 2px;
+=======
 
 /* ── BODY ────────────────────────────────────────
    Configuración base de la página completa.
@@ -470,4 +894,5 @@ body {
 
 .prompt-card-new:hover span {
   color: var(--accent-light);
+>>>>>>> ebc42c372207863eb3d18231cd37ba87e4f55919:extension/Complemento/dashboard/dashboard.css
 }
