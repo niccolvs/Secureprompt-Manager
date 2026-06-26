@@ -74,7 +74,21 @@ body {
   padding: 22px 26px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+}
+
+.spm-main::-webkit-scrollbar {
+  width: 8px;
+}
+.spm-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+.spm-main::-webkit-scrollbar-thumb {
+  background: rgba(92, 127, 163, 0.4);
+  border-radius: 10px;
+}
+.spm-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(92, 127, 163, 0.6);
 }
 
 .spm-topbar {
