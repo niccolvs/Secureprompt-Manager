@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function enableDarkMode() {
+    document.documentElement.classList.add('dark-mode');
     body.classList.add('dark-mode');
     btnTheme.classList.replace('ti-moon', 'ti-sun');
     logo.src = '../assets/logo/SPM_logo_claro.png';
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function disableDarkMode() {
+    document.documentElement.classList.remove('dark-mode');
     body.classList.remove('dark-mode');
     btnTheme.classList.replace('ti-sun', 'ti-moon');
     logo.src = '../assets/logo/SPM_logo_oscuro.png';
