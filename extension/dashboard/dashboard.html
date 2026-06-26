@@ -715,9 +715,15 @@
       const container = document.getElementById("emoji-picker-container");
 
       const rect = e.currentTarget.getBoundingClientRect();
-      // Asegurar que no se salga de la pantalla
-      let topPos = rect.bottom + window.scrollY + 5;
+      // Posicionar arriba del botón para evitar que se corte
+      const pickerHeight = 400;
+      let topPos = rect.top + window.scrollY - pickerHeight - 5;
       let leftPos = rect.left + window.scrollX;
+
+      // Si no cabe arriba, ponerlo abajo como fallback
+      if (topPos < 0) {
+        topPos = rect.bottom + window.scrollY + 5;
+      }
 
       container.style.top = topPos + "px";
       container.style.left = leftPos + "px";
