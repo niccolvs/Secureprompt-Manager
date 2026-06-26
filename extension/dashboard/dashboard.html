@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<<<<<<< HEAD:extension/dashboard/dashboard.html
 
 <head>
   <meta charset="UTF-8" />
@@ -8,6 +7,11 @@
   <meta name="description"
     content="Dashboard del Secure Prompt Manager — gestiona tu historial, estadísticas y prompts guardados de forma segura." />
   <title>Dashboard — SecurePrompt Manager</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
 
   <!-- Tabler Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
@@ -71,19 +75,10 @@
       }
     });
   </script>
-=======
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SecurePrompt Manager</title>
-  <!-- Vinculamos el CSS que acabamos de crear -->
-  <link rel="stylesheet" href="dashboard.css" />
->>>>>>> ebc42c372207863eb3d18231cd37ba87e4f55919:extension/Complemento/dashboard/dashboard.html
 </head>
 
 <body>
 
-<<<<<<< HEAD:extension/dashboard/dashboard.html
   <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
     Dashboard del Secure Prompt Manager — muestra historial, estadísticas y prompts guardados
   </h2>
@@ -329,180 +324,4 @@
   </style>
 </body>
 
-=======
-  <aside class="sidebar">
-
-    <!-- Logo de la aplicación -->
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">
-        <!-- Ícono SVG del candado/check -->
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M4 8L7 11L12 5" stroke="white" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <span class="sidebar-logo-text">SecurePrompt</span>
-    </div>
-
-    <!-- Links de navegación -->
-    <!-- La clase "active" marca la página actual -->
-    <a href="dashboard.html" class="nav-item active">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="2" y="2" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-        <rect x="9" y="2" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-        <rect x="2" y="9" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-        <rect x="9" y="9" width="5" height="5" rx="1"
-          stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-      Dashboard
-    </a>
-
-    <a href="prompts.html" class="nav-item">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M3 4h10M3 8h10M3 12h6"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Mis prompts
-    </a>
-
-    <a href="historial.html" class="nav-item">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M8 5v3l2 1.5" stroke="currentColor"
-          stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Historial
-    </a>
-
-    <!-- bottom lo empuja al fondo del sidebar -->
-    <a href="perfil.html" class="nav-item bottom">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      Perfil
-    </a>
-
-  </aside>
-
-
-  <!-- ================================================
-       CONTENIDO PRINCIPAL
-       Todo lo que va a la derecha del sidebar.
-       Este sí scrollea si hay mucho contenido.
-       ================================================ -->
-  <main class="main-content">
-
-    <!-- ── Barra superior ── -->
-    <div class="topbar">
-      <h1 class="topbar-title">Mis prompts</h1>
-
-      <div class="topbar-controls">
-        <!-- Buscador — por ahora solo diseño, JS lo activamos después -->
-        <input
-          type="text"
-          class="search-input"
-          placeholder="Buscar prompts..."
-          id="search-input"
-        />
-
-        <!-- Botón para crear nuevo prompt -->
-        <button class="btn-new" id="btn-new-prompt">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v10M1 6h10" stroke="white"
-              stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          Nuevo prompt
-        </button>
-
-        <!-- Avatar con iniciales del usuario -->
-        <!-- Las iniciales las pondrá JavaScript dinámicamente -->
-        <div class="avatar" id="user-avatar">DR</div>
-      </div>
-    </div>
-
-
-    <!-- ── Estadísticas ── -->
-    <!-- Estos números los actualizará JavaScript según los prompts guardados -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total prompts</div>
-        <div class="stat-value accent" id="stat-total">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Esta semana</div>
-        <div class="stat-value" id="stat-semana">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Favoritos</div>
-        <div class="stat-value" id="stat-favoritos">0</div>
-      </div>
-    </div>
-
-
-    <!-- ── Lista de prompts ── -->
-    <div class="section-title">Recientes</div>
-
-    <!-- 
-      Este grid lo llenará JavaScript dinámicamente.
-      Por ahora ponemos 2 tarjetas de ejemplo para
-      ver cómo se ve el diseño.
-    -->
-    <div class="prompts-grid" id="prompts-grid">
-
-      <!-- Tarjeta de ejemplo 1 -->
-      <div class="prompt-card featured">
-        <div class="prompt-title">Resumen ejecutivo</div>
-        <div class="prompt-preview">
-          Actúa como consultor senior y resume el siguiente
-          documento en 3 puntos clave con lenguaje claro...
-        </div>
-        <div class="prompt-footer">
-          <span class="tag">Trabajo</span>
-          <div class="prompt-actions">
-            <button class="action-btn">Editar</button>
-            <button class="action-btn danger">Eliminar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta de ejemplo 2 -->
-      <div class="prompt-card">
-        <div class="prompt-title">Corrector de código</div>
-        <div class="prompt-preview">
-          Revisa el siguiente código, identifica errores
-          y explica cada corrección paso a paso...
-        </div>
-        <div class="prompt-footer">
-          <span class="tag">Desarrollo</span>
-          <div class="prompt-actions">
-            <button class="action-btn">Editar</button>
-            <button class="action-btn danger">Eliminar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta para crear nuevo prompt -->
-      <div class="prompt-card-new" id="btn-card-new">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 4v16M4 12h16" stroke="#4a6278"
-            stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span>Nuevo prompt</span>
-      </div>
-
-    </div>
-
-  </main>
-
-  <!-- Vinculamos el JavaScript al final del body -->
-  <!-- Siempre va aquí abajo, nunca en el <head> -->
-  <script src="dashboard.js"></script>
-
-</body>
->>>>>>> ebc42c372207863eb3d18231cd37ba87e4f55919:extension/Complemento/dashboard/dashboard.html
 </html>
