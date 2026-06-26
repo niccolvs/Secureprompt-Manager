@@ -144,6 +144,24 @@ body {
   background: #2C3D58;
   border-radius: 10px;
   padding: 12px 18px;
+  max-height: 190px;
+  overflow-y: auto;
+}
+
+.spm-hist::-webkit-scrollbar {
+  width: 6px;
+}
+.spm-hist::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin: 8px 0;
+}
+.spm-hist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.spm-hist::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .spm-hist-row {

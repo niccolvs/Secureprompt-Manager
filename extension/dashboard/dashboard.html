@@ -22,6 +22,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- Guard: redirige a login si no hay sesión activa -->
   <script>
     const _cfg = {
@@ -125,7 +128,10 @@
       <!-- ── Fila superior: Historial + Estadísticas ── -->
       <div class="spm-grid">
         <div>
-          <div class="spm-section-title">Historial</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="spm-section-title" style="margin-bottom: 0;">Historial</div>
+            <i class="ti ti-trash" style="cursor: pointer; color: #6A8099; font-size: 16px; transition: color 0.2s;" onmouseover="this.style.color='#DC2626'" onmouseout="this.style.color='#6A8099'" onclick="borrarHistorial()" title="Borrar historial"></i>
+          </div>
           <div class="spm-hist" id="historial-panel"></div>
         </div>
         <div>
@@ -135,6 +141,10 @@
             </div>
             <div class="spm-stat-row"><span class="spm-stat-lbl">Plantillas usadas</span><span
                 class="spm-stat-num" id="stat-plantillas">0</span></div>
+          </div>
+          <div class="spm-section-title" style="margin-top: 16px;">IAs más usadas</div>
+          <div class="spm-stats" style="height: 160px; padding: 12px; display: flex; align-items: center; justify-content: center; position: relative;">
+            <canvas id="chart-plataformas"></canvas>
           </div>
         </div>
       </div>
@@ -242,6 +252,8 @@
       }
     }
 
+    let chartInstance = null;
+
     async function fetchStats() {
       try {
         const res = await fetch(`${API_URL}/stats`);
@@ -253,11 +265,49 @@
         plantillasEl.textContent = data.plantillas_usadas || 0;
         censurasEl.classList.add("spm-fade-in");
         plantillasEl.classList.add("spm-fade-in");
+
+        if (data.uso_plataformas && data.uso_plataformas.length > 0) {
+          renderChart(data.uso_plataformas);
+        }
       } catch (err) {
         console.error("Error cargando stats:", err);
         document.getElementById("stat-censuras").textContent = "0";
         document.getElementById("stat-plantillas").textContent = "0";
       }
+    }
+
+    function renderChart(plataformas) {
+      const ctx = document.getElementById('chart-plataformas').getContext('2d');
+      const labels = plataformas.map(p => p.plataforma);
+      const data = plataformas.map(p => p.cantidad);
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Uso por IA',
+            data: data,
+            backgroundColor: '#5C7FA3',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
     }
 
     async function fetchHistorial() {
@@ -377,6 +427,18 @@
       navigator.clipboard.writeText(texto)
         .then(() => alert("✅ Copiado al portapapeles"))
         .catch(err => console.error("Error al copiar:", err));
+    }
+
+    async function borrarHistorial() {
+      if (!confirm("¿Quieres borrar el historial?")) return;
+      try {
+        const res = await fetch(`${API_URL}/historial`, { method: "DELETE" });
+        if (res.ok) {
+          fetchHistorial();
+        }
+      } catch (err) {
+        console.error("Error al borrar historial:", err);
+      }
     }
 
     // ── Modal Añadir Prompt ───────────────────────

@@ -178,12 +178,22 @@ def obtener_stats():
     cursor.execute("SELECT COUNT(*) as total FROM tokens")
     total_censuras = cursor.fetchone()["total"]
 
+    # Agrupar historial por plataforma
+    cursor.execute("""
+        SELECT plataforma, COUNT(*) as cantidad
+        FROM historial
+        GROUP BY plataforma
+        ORDER BY cantidad DESC
+    """)
+    plataformas = [dict(row) for row in cursor.fetchall()]
+
     conn.close()
 
     return {
         "total_prompts": total_prompts,
         "total_censuras": total_censuras,
-        "plantillas_usadas": total_prompts
+        "plantillas_usadas": total_prompts,
+        "uso_plataformas": plataformas
     }
 
 # ── GET /historial ────────────────────────────────
@@ -219,3 +229,14 @@ def registrar_historial(entry: HistorialCreate):
     conn.close()
 
     return {"mensaje": "Historial registrado"}
+
+# ── DELETE /historial ─────────────────────────────
+# Elimina todo el historial
+@router.delete("/historial")
+def eliminar_historial():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM historial")
+    conn.commit()
+    conn.close()
+    return {"mensaje": "Historial eliminado"}
