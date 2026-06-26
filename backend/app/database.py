@@ -33,9 +33,16 @@ def init_db():
             contenido      TEXT NOT NULL,
             contenido_limpio TEXT NOT NULL,
             categoria      TEXT NOT NULL,
+            icono          TEXT NOT NULL DEFAULT 'ti-file-text',
             fecha_creacion TEXT NOT NULL
         )
     """)
+
+    # Migrar base de datos existente si es necesario
+    try:
+        cursor.execute("ALTER TABLE prompts ADD COLUMN icono TEXT DEFAULT 'ti-file-text'")
+    except sqlite3.OperationalError:
+        pass # La columna ya existe
 
     # Tabla nueva — guarda el mapa token → dato real
     # Cada token está relacionado con un prompt por prompt_id

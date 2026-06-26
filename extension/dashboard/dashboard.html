@@ -141,8 +141,13 @@
 
       <!-- ── Fila inferior: Prompts + Detalle ── -->
       <div class="spm-grid" style="margin-bottom:0;flex:1">
-        <div>
-          <div class="spm-section-title">Tus prompts</div>
+        <div style="display:flex; flex-direction:column;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="spm-section-title" style="margin-bottom: 0;">Tus prompts</div>
+            <button class="spm-btn spm-btn-dark" onclick="mostrarModal()" style="display: flex; align-items: center; gap: 4px; padding: 4px 10px;">
+              <i class="ti ti-plus" style="font-size: 14px;"></i> Nuevo
+            </button>
+          </div>
           <div id="prompts-list"></div>
         </div>
         <div>
@@ -372,6 +377,83 @@
       navigator.clipboard.writeText(texto)
         .then(() => alert("✅ Copiado al portapapeles"))
         .catch(err => console.error("Error al copiar:", err));
+    }
+
+    // ── Modal Añadir Prompt ───────────────────────
+    function mostrarModal() {
+      cerrarModal();
+      
+      const modalHTML = `
+        <div id="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 25, 35, 0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);">
+          <div style="background: #fff; width: 100%; max-width: 500px; padding: 24px; border-radius: 10px; border: 1px solid #C0D4E8; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <h2 style="margin-bottom: 20px; font-size: 18px; color: #1C2B3A; font-weight: 500;">Añadir Nuevo Prompt</h2>
+            
+            <input type="text" id="prompt-titulo" placeholder="Ej: Análisis de Vulnerabilidades" style="width: 100%; padding: 12px; margin-bottom: 12px; background: #EFF4FA; border: 1px solid #C0D4E8; border-radius: 6px; color: #1C2B3A; font-family: inherit; font-size: 14px; outline: none;">
+            
+            <input type="text" id="prompt-categoria" placeholder="Categoría (Ej: Ciberseguridad, IoT)" style="width: 100%; padding: 12px; margin-bottom: 12px; background: #EFF4FA; border: 1px solid #C0D4E8; border-radius: 6px; color: #1C2B3A; font-family: inherit; font-size: 14px; outline: none;">
+            
+            <textarea id="prompt-contenido" placeholder="Escribe el prompt aquí. ¡Los datos sensibles serán detectados!" rows="5" style="width: 100%; padding: 12px; margin-bottom: 20px; background: #EFF4FA; border: 1px solid #C0D4E8; border-radius: 6px; color: #1C2B3A; font-family: inherit; font-size: 14px; resize: vertical; outline: none;"></textarea>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+              <button id="btn-cerrar-modal" style="padding: 10px 16px; background: transparent; border: 1px solid #C0D4E8; color: #6A8099; border-radius: 6px; cursor: pointer; transition: 0.2s; font-family: inherit;">Cancelar</button>
+              <button id="btn-guardar-modal" style="padding: 10px 16px; background: #2C3D58; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-family: inherit;">Guardar y Analizar</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+      document.getElementById("btn-cerrar-modal").addEventListener("click", cerrarModal);
+      document.getElementById("btn-guardar-modal").addEventListener("click", guardarNuevoPrompt);
+    }
+
+    function cerrarModal() {
+      const modal = document.getElementById("modal-overlay");
+      if (modal) modal.remove();
+    }
+
+    async function guardarNuevoPrompt() {
+      const titulo = document.getElementById("prompt-titulo").value.trim();
+      const categoria = document.getElementById("prompt-categoria").value.trim();
+      const contenido = document.getElementById("prompt-contenido").value.trim();
+
+      if (!titulo || !contenido || !categoria) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
+
+      const btnGuardar = document.getElementById("btn-guardar-modal");
+      const btnTextoOriginal = btnGuardar.innerText;
+      btnGuardar.innerText = "Guardando...";
+      btnGuardar.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}/prompts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ titulo, contenido, categoria })
+        });
+
+        if (!response.ok) throw new Error("Error al guardar");
+
+        const data = await response.json();
+        cerrarModal();
+        
+        // Recargar datos
+        fetchPrompts();
+        fetchStats();
+
+        if (data.total_entidades > 0) {
+          alert(`✅ Guardado con éxito. Se censuraron ${data.total_entidades} datos sensibles.`);
+        }
+
+      } catch (error) {
+        console.error(error);
+        alert("Error al intentar guardar el prompt. Revisa que FastAPI esté encendido.");
+        btnGuardar.innerText = btnTextoOriginal;
+        btnGuardar.disabled = false;
+      }
     }
 
     // ── Error de conexión ─────────────────────────
