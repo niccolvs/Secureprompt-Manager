@@ -43,7 +43,7 @@ body {
   padding: 11px 22px;
   cursor: pointer;
   font-size: 14px;
-  color: #fff;
+  color: #ffffff !important;
   font-weight: 400;
   border-radius: 0 24px 24px 0;
   margin-bottom: 2px;
@@ -51,9 +51,9 @@ body {
 }
 
 .spm-nav-item.active {
-  background: #fff;
-  color: #2C3D58;
-  font-weight: 700;
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 .spm-logout {

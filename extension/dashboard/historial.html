@@ -77,7 +77,7 @@
     <!-- ── Contenido principal ── -->
     <div class="spm-main">
       <div class="spm-topbar">
-        <h1 class="spm-title" id="greeting">Hola!</h1>
+        <div></div>
         <div class="spm-user">
           <i id="theme-toggle" class="ti ti-moon" aria-hidden="true"
             style="font-size:18px;color:#6A8099;cursor:pointer;" title="Cambiar tema"></i>
@@ -107,13 +107,21 @@
         </div>
       </div>
       
-      <!-- Modal Texto Censurado -->
-      <div id="modal-censurado" class="spm-modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div class="spm-modal-content" style="max-width: 600px; width: 100%;">
-          <h2 class="spm-h2" style="margin-top:0">Texto Original Censurado</h2>
-          <textarea id="censurado-contenido" class="spm-input spm-textarea" readonly style="margin-top:12px; height:200px; width:100%; border:1px solid #C0D4E8; border-radius:6px; padding:12px; outline:none; resize:none;"></textarea>
-          <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
-            <button class="spm-btn spm-btn-ghost" onclick="cerrarModalCensurado()">Cerrar</button>
+      <!-- Modal Detalle Historial -->
+      <div id="modal-censurado" class="spm-modal spm-fade-in" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div class="spm-modal-content" style="background: #fff; width:100%; max-width:600px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+          <div style="padding:24px 24px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #EEF2F8;">
+             <h2 style="margin:0; font-size:18px; font-weight:600; color:#1C2B3A;">Detalle de la Interacción</h2>
+             <button onclick="cerrarModalCensurado()" style="background:none; border:none; cursor:pointer; color:#6A8099;"><i class="ti ti-x" style="font-size:20px;"></i></button>
+          </div>
+          <div style="padding:24px; overflow-y:auto; flex:1;">
+             <div id="censurado-contenido-box" style="background:#F4F7FB; border:1px solid #E1E8F0; border-radius:8px; padding:16px; font-size:13px; color:#2A3A4A; line-height:1.6; white-space:pre-wrap; font-family: 'Inter', sans-serif;"></div>
+          </div>
+          <div style="padding:16px 24px; border-top:1px solid #EEF2F8; display:flex; justify-content:flex-end; gap:12px;">
+             <button id="btn-toggle-censura" class="spm-btn spm-btn-dark" onclick="toggleCensura()" style="display: flex; align-items: center; gap: 6px;">
+               <i class="ti ti-shield-check"></i> <span>Censurar Texto</span>
+             </button>
+             <button class="spm-btn spm-btn-ghost" onclick="cerrarModalCensurado()">Cerrar</button>
           </div>
         </div>
       </div>
@@ -215,10 +223,86 @@
         }
     }
 
+    let originalTextCache = '';
+    let censoredTextCache = '';
+    let isCensoredMode = false;
+
     function abrirModalCensurado(texto) {
-      document.getElementById("censurado-contenido").value = texto || 'No hay texto censurado registrado.';
+      originalTextCache = texto || 'No hay texto registrado.';
+      censoredTextCache = '';
+      isCensoredMode = false;
+      
+      const contentBox = document.getElementById("censurado-contenido-box");
+      const toggleBtn = document.getElementById("btn-toggle-censura");
+      const toggleBtnText = toggleBtn.querySelector("span");
+      const toggleBtnIcon = toggleBtn.querySelector("i");
+      
+      contentBox.textContent = originalTextCache;
+      toggleBtnText.textContent = "Censurar Texto";
+      toggleBtnIcon.className = "ti ti-shield-check";
+      
+      const modalContent = document.querySelector("#modal-censurado .spm-modal-content");
+      const isDark = document.body.classList.contains("dark-mode");
+      if (isDark) {
+        modalContent.style.background = '#15202B';
+        modalContent.style.borderColor = '#2C3D58';
+        modalContent.querySelector('h2').style.color = '#fff';
+        const closeBtn = modalContent.querySelector('button i.ti-x');
+        if(closeBtn) closeBtn.parentElement.style.color = '#fff';
+        contentBox.style.background = '#0B1120';
+        contentBox.style.color = '#fff';
+        contentBox.style.borderColor = '#2C3D58';
+      } else {
+        modalContent.style.background = '#fff';
+        modalContent.style.borderColor = 'none';
+        modalContent.querySelector('h2').style.color = '#1C2B3A';
+        const closeBtn = modalContent.querySelector('button i.ti-x');
+        if(closeBtn) closeBtn.parentElement.style.color = '#6A8099';
+        contentBox.style.background = '#F4F7FB';
+        contentBox.style.color = '#2A3A4A';
+        contentBox.style.borderColor = '#E1E8F0';
+      }
+      
       document.getElementById("modal-censurado").style.display = "flex";
     }
+
+    async function toggleCensura() {
+      const contentBox = document.getElementById("censurado-contenido-box");
+      const toggleBtn = document.getElementById("btn-toggle-censura");
+      const toggleBtnText = toggleBtn.querySelector("span");
+      const toggleBtnIcon = toggleBtn.querySelector("i");
+      
+      if (!isCensoredMode) {
+        if (!censoredTextCache) {
+          toggleBtnText.textContent = "Censurando...";
+          try {
+            const res = await fetch(`${API_URL}/prompts/analizar`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ titulo: "Historial", contenido: originalTextCache, categoria: "General" })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              censoredTextCache = data.contenido_limpio || originalTextCache;
+            } else {
+              censoredTextCache = "Error al censurar.";
+            }
+          } catch (e) {
+            censoredTextCache = "Error de conexión al censurar.";
+          }
+        }
+        contentBox.textContent = censoredTextCache;
+        toggleBtnText.textContent = "Ver Original";
+        toggleBtnIcon.className = "ti ti-eye";
+        isCensoredMode = true;
+      } else {
+        contentBox.textContent = originalTextCache;
+        toggleBtnText.textContent = "Censurar Texto";
+        toggleBtnIcon.className = "ti ti-shield-check";
+        isCensoredMode = false;
+      }
+    }
+
     function cerrarModalCensurado() {
       document.getElementById("modal-censurado").style.display = "none";
     }
@@ -249,12 +333,28 @@
       }
       panel.innerHTML = historial.map(h => {
         const safeText = encodeURIComponent(h.texto_censurado || '');
+        
+        // Determinar icono según plataforma (opcional, fallback genérico)
+        let iconClass = "ti-history";
+        if (h.plataforma.toLowerCase().includes("chatgpt")) iconClass = "ti-message-chatbot";
+        else if (h.plataforma.toLowerCase().includes("claude")) iconClass = "ti-brain";
+        else if (h.plataforma.toLowerCase().includes("gemini")) iconClass = "ti-sparkles";
+        
         return `
-        <div class="spm-hist-row spm-fade-in" style="cursor: pointer;" onclick="abrirModalCensurado(decodeURIComponent('${safeText}'))">
-          <span style="font-weight:700;width:80px">${h.plataforma}</span>
-          <span style="flex:1">${h.fecha}</span>
-          <span style="margin-right: 12px;">${h.hora}</span>
-          <i class="ti ti-chevron-right" style="color: #6A8099;"></i>
+        <div class="spm-prompt-item spm-fade-in" style="cursor: pointer; border-left: 4px solid transparent; padding: 16px; margin-bottom: 12px;" onclick="abrirModalCensurado(decodeURIComponent('${safeText}'))">
+          <div style="flex-shrink:0; width: 40px; height: 40px; border-radius: 50%; background: rgba(92, 127, 163, 0.15); color: #5C7FA3; display: flex; align-items: center; justify-content: center; margin-right: 16px; transition: all 0.2s;">
+            <i class="ti ${iconClass}" aria-hidden="true" style="font-size:18px;"></i>
+          </div>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <span style="font-weight:600; font-size:15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85%; color: var(--text-primary, inherit);" class="prompt-title">${h.plataforma}</span>
+              <span style="font-size:11px; opacity:0.6; white-space: nowrap; margin-top:2px;">${h.fecha} ${h.hora}</span>
+            </div>
+            <span style="font-size:13px; opacity:0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; display:block;" class="prompt-preview">Haz clic para ver el contenido censurado de la conversación.</span>
+          </div>
+          <div style="display:flex; align-items:center; margin-left:12px;">
+            <i class="ti ti-chevron-right" style="color: #6A8099;"></i>
+          </div>
         </div>
       `}).join("");
     }
