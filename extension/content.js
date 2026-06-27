@@ -108,57 +108,61 @@ function crearPanel(mapaTokens, onRevertirPrompt) {
         position: "fixed",
         bottom: "140px",
         right: "20px",
-        width: "320px",
-        backgroundColor: "#1e1e2e",
+        width: "360px",
+        backgroundColor: "#E6F0FA",
         borderRadius: "16px",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
         zIndex: "99999",
-        padding: "16px",
-        color: "white",
+        padding: "20px",
+        color: "#1C2B3A",
         fontFamily: "system-ui, sans-serif",
         fontSize: "13px",
     });
 
     panel.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <span style="font-weight:700;font-size:14px;">\uD83D\uDEE1\uFE0F SecurePrompt</span>
-            <button id="sp-cerrar" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;">&times;</button>
+        <div style="position:relative;margin-bottom:16px;">
+            <button id="sp-cerrar" style="position:absolute;top:0;right:0;background:none;border:none;color:#7A90A4;font-size:20px;cursor:pointer;padding:0;line-height:1;">&times;</button>
+            <h3 style="margin:0 0 4px 0;font-size:20px;font-weight:700;color:#000000;">Gestor de censura</h3>
+            <p style="margin:0;font-size:13px;color:#7A90A4;">Devuelve el texto original después de la censura</p>
         </div>
 
-        <label style="font-size:12px;color:#aaa;display:block;margin-bottom:6px;">
+        <label style="font-size:14px;font-weight:600;color:#1C2B3A;display:block;margin-bottom:8px;">
             Pega la respuesta del chat:
         </label>
-        <textarea id="sp-input" placeholder="Pega aquí el texto con tokens [Persona_1]..."
-            style="width:100%;height:90px;background:#2a2a3e;border:1px solid #444;
-                   border-radius:8px;color:white;padding:8px;font-size:12px;
-                   resize:vertical;box-sizing:border-box;"></textarea>
+        <textarea id="sp-input"
+            style="width:100%;height:100px;background:#F4F8FB;border:1px solid #7A90A4;
+                   border-radius:12px;color:#1C2B3A;padding:12px;font-size:13px;
+                   resize:vertical;box-sizing:border-box;margin-bottom:12px;outline:none;font-family:inherit;"></textarea>
 
         <button id="sp-revertir-respuesta"
-            style="width:100%;padding:8px;background:#10a37f;border:none;border-radius:8px;
-                   color:white;font-weight:600;cursor:pointer;margin:8px 0;">
-            \u21A9\uFE0F Revertir respuesta
+            style="width:100%;padding:12px;background:#3B5270;border:none;border-radius:24px;
+                   color:white;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:16px;font-family:inherit;">
+            Revertir respuesta
         </button>
 
-        <div id="sp-resultado-wrap" style="display:none;margin-bottom:8px;">
-            <label style="font-size:12px;color:#aaa;display:block;margin-bottom:6px;">Resultado:</label>
+        <div id="sp-resultado-wrap" style="display:none;margin-bottom:16px;">
+            <label style="font-size:14px;font-weight:600;color:#1C2B3A;display:block;margin-bottom:8px;">Resultado:</label>
             <textarea id="sp-resultado" readonly
-                style="width:100%;height:90px;background:#2a2a3e;border:1px solid #444;
-                       border-radius:8px;color:#7cefcb;padding:8px;font-size:12px;
-                       resize:vertical;box-sizing:border-box;"></textarea>
+                style="width:100%;height:100px;background:#F4F8FB;border:1px solid #7A90A4;
+                       border-radius:12px;color:#1C2B3A;padding:12px;font-size:13px;
+                       resize:vertical;box-sizing:border-box;margin-bottom:8px;outline:none;font-family:inherit;"></textarea>
             <button id="sp-copiar"
-                style="width:100%;padding:6px;background:#2a2a3e;border:1px solid #444;
-                       border-radius:8px;color:white;cursor:pointer;margin-top:6px;font-size:12px;">
-                \uD83D\uDCCB Copiar resultado
+                style="width:100%;padding:12px;background:#A5BFD8;border:none;
+                       border-radius:24px;color:#2C3D58;font-weight:600;cursor:pointer;font-size:14px;font-family:inherit;">
+                Copiar resultado
             </button>
         </div>
 
-        <hr style="border:none;border-top:1px solid #333;margin:8px 0;">
+        <hr style="border:none;border-top:1px solid #C0D4E8;margin:0 0 16px 0;">
 
-        <button id="sp-revertir-prompt"
-            style="width:100%;padding:8px;background:#2a2a3e;border:1px solid #444;
-                   border-radius:8px;color:white;cursor:pointer;font-size:12px;">
-            \u21A9\uFE0F Revertir también el prompt
-        </button>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button id="sp-revertir-prompt"
+                style="padding:8px 16px;background:#A5BFD8;border:none;
+                       border-radius:20px;color:#3B5270;font-weight:600;cursor:pointer;font-size:13px;font-family:inherit;">
+                Revertir tambi\u00e9n el prompt
+            </button>
+            <img src="${chrome.runtime.getURL('assets/logo/SPM_logo_extension.png')}" alt="Logo" style="width:32px;height:32px;border-radius:50%;object-fit:contain;">
+        </div>
     `;
 
     document.body.appendChild(overlay);
@@ -205,9 +209,12 @@ function crearBotonFlotante() {
     const boton = document.createElement("button");
     boton.id = "secure-prompt-global-btn";
 
-    // Creamos el contenido del boton, el emoji y el texto
-    const iconSpan = document.createElement("span");
-    iconSpan.textContent = "\uD83D\uDEE1\uFE0F"; // escudo
+    // Creamos el contenido del boton, el logo y el texto
+    const iconSpan = document.createElement("img");
+    iconSpan.src = chrome.runtime.getURL("assets/logo/SPM_logo_extension.png");
+    iconSpan.style.width = "22px";
+    iconSpan.style.height = "22px";
+    iconSpan.style.pointerEvents = "none";
 
     const labelSpan = document.createElement("span");
     labelSpan.textContent = "Anonimizar";
@@ -230,8 +237,8 @@ function crearBotonFlotante() {
         position: "fixed",
         bottom: "85px",
         right: "20px",
-        backgroundColor: "#10a37f",
-        color: "white",
+        backgroundColor: "#C0D4E8",
+        color: "#1C2B3A",
         border: "none",
         width: "44px",
         height: "44px",
@@ -259,7 +266,7 @@ function crearBotonFlotante() {
         expandido = true;
         boton.style.width = "165px";
         boton.style.borderRadius = "25px";
-        boton.style.backgroundColor = "#1a7f64";
+        boton.style.backgroundColor = "#A5BFD8";
         labelSpan.style.opacity = "1";
         labelSpan.style.maxWidth = "130px";
         labelSpan.style.marginLeft = "6px";
@@ -270,7 +277,7 @@ function crearBotonFlotante() {
         expandido = false;
         boton.style.width = "44px";
         boton.style.borderRadius = "50%";
-        boton.style.backgroundColor = "#10a37f";
+        boton.style.backgroundColor = "#C0D4E8";
         labelSpan.style.opacity = "0";
         labelSpan.style.maxWidth = "0";
         labelSpan.style.marginLeft = "0";
