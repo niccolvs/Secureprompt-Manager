@@ -153,6 +153,10 @@ body {
   margin-bottom: 16px;
 }
 
+.spm-grid > div {
+  min-width: 0;
+}
+
 /* ── Historial ── */
 .spm-hist {
   background: #2C3D58;
@@ -579,6 +583,11 @@ body.dark-mode,
 body.dark-mode .spm-root, 
 body.dark-mode .spm-main {
   background: #0B1120;
+}
+
+body.dark-mode .spm-sidebar {
+  background: #1C2B3A;
+  transition: background 0.3s ease;
 }
 
 body.dark-mode,

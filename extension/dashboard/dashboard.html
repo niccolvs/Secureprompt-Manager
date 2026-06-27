@@ -314,6 +314,10 @@
         chartInstance.destroy();
       }
 
+      const isDark = document.body.classList.contains("dark-mode");
+      const textColor = isDark ? '#ffffff' : '#666';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -332,8 +336,15 @@
             legend: { display: false }
           },
           scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 } },
-            x: { grid: { display: false } }
+            y: { 
+              beginAtZero: true, 
+              ticks: { precision: 0, color: textColor },
+              grid: { color: gridColor }
+            },
+            x: { 
+              grid: { display: false },
+              ticks: { color: textColor }
+            }
           }
         }
       });
@@ -837,6 +848,16 @@
       } else {
         themeToggle.classList.remove("ti-sun");
         themeToggle.classList.add("ti-moon");
+      }
+
+      if (chartInstance) {
+        const textColor = isDark ? '#ffffff' : '#666';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        
+        chartInstance.options.scales.x.ticks.color = textColor;
+        chartInstance.options.scales.y.ticks.color = textColor;
+        chartInstance.options.scales.y.grid.color = gridColor;
+        chartInstance.update();
       }
     });
   </script>
