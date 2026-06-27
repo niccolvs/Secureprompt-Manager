@@ -647,6 +647,71 @@ body.dark-mode .prompt-hover-actions button[title="Eliminar"] {
   color: #ef4444 !important;
 }
 
+/* ── Profile Dropdown ── */
+.spm-profile-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #E1E8F0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 180px;
+  z-index: 1000;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.spm-profile-dropdown.show {
+  display: flex;
+}
+
+.spm-dropdown-item {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #1C2B3A;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.spm-dropdown-item:hover {
+  background: #F4F7FB;
+}
+
+.spm-dropdown-item.danger {
+  color: #DC2626;
+  border-top: 1px solid #E1E8F0;
+}
+
+.spm-dropdown-item.danger:hover {
+  background: rgba(220,38,38,0.05);
+}
+
+body.dark-mode .spm-profile-dropdown {
+  background: #1C2B3A;
+  border-color: #2C3D58;
+}
+
+body.dark-mode .spm-dropdown-item {
+  color: #fff;
+}
+
+body.dark-mode .spm-dropdown-item:hover {
+  background: #2C3D58;
+}
+
+body.dark-mode .spm-dropdown-item.danger {
+  color: #ef4444;
+  border-color: #2C3D58;
+}
+
+body.dark-mode .spm-dropdown-item.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
 body.dark-mode .spm-stat-row + .spm-stat-row {
   border-top-color: #2C3D58 !important;
 }

@@ -115,8 +115,19 @@
             <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
             <div style="font-size:11px;color:#6A8099" id="user-email"></div>
           </div>
-          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;"
-            onclick="activeNav='Perfil'; renderNav();"></div>
+          <div style="position: relative;">
+            <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;"
+              onclick="document.getElementById('profile-dropdown').classList.toggle('show')"></div>
+            
+            <div id="profile-dropdown" class="spm-profile-dropdown spm-fade-in">
+              <div class="spm-dropdown-item" onclick="cerrarSesion()">
+                <i class="ti ti-logout" style="margin-right: 8px; font-size: 16px;"></i> Cerrar sesión
+              </div>
+              <div class="spm-dropdown-item danger" onclick="borrarCuenta()">
+                <i class="ti ti-trash" style="margin-right: 8px; font-size: 16px;"></i> Borrar cuenta
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -257,7 +268,6 @@
         <a href="dashboard.html" class="spm-nav-item ${activeNav === 'Dashboard' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Dashboard</a>
         <a href="prompts.html" class="spm-nav-item ${activeNav === 'Tus prompts' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Tus prompts</a>
         <a href="historial.html" class="spm-nav-item ${activeNav === 'Historial' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Historial</a>
-        <a href="perfil.html" class="spm-nav-item ${activeNav === 'Perfil' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Perfil</a>
       `;
     }
 
@@ -457,7 +467,7 @@
       if (activeNav === "Dashboard" && promptsData.length > 3) {
         html += `
           <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-            <button class="spm-btn spm-btn-ghost" onclick="document.querySelector('[data-nav=\\'Tus prompts\\']').click()" style="font-size: 12px; padding: 4px 12px; display: flex; align-items: center; gap: 4px;">
+            <button class="spm-btn spm-btn-ghost" onclick="window.location.href='prompts.html'" style="font-size: 12px; padding: 4px 12px; display: flex; align-items: center; gap: 4px;">
               Ver todo <i class="ti ti-arrow-right"></i>
             </button>
           </div>
@@ -955,11 +965,35 @@
       }
     });
 
-    // ── Cerrar sesión ─────────────────────────────
-    document.getElementById("btn-logout").addEventListener("click", () => {
+    // ── Cerrar sesión y Perfil ─────────────────────────────
+    if (document.getElementById("btn-logout")) {
+      document.getElementById("btn-logout").addEventListener("click", cerrarSesion);
+    }
+    
+    function cerrarSesion() {
       _auth.signOut().then(() => {
         window.location.replace("login.html");
       });
+    }
+
+    function borrarCuenta() {
+      if(confirm("¿Estás seguro de que quieres borrar tu cuenta? Esta acción no se puede deshacer.")) {
+        const user = _auth.currentUser;
+        if(user) {
+          user.delete().then(() => window.location.replace("login.html")).catch(err => {
+            console.error(err);
+            alert("Error al borrar la cuenta. Puede que necesites volver a iniciar sesión antes de realizar esta acción.");
+          });
+        }
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const dropdown = document.getElementById("profile-dropdown");
+      const avatar = document.getElementById("user-avatar");
+      if (dropdown && dropdown.classList.contains("show") && !dropdown.contains(e.target) && !avatar.contains(e.target)) {
+        dropdown.classList.remove("show");
+      }
     });
 
     // ── Cambiar foto de perfil ────────────────────
