@@ -120,10 +120,10 @@ function crearPanel(mapaTokens, onRevertirPrompt) {
     });
 
     panel.innerHTML = `
-        <div style="position:relative;margin-bottom:16px;">
+        <div id="sp-panel-header" style="position:relative;margin-bottom:16px;cursor:grab;user-select:none;">
             <button id="sp-cerrar" style="position:absolute;top:0;right:0;background:none;border:none;color:#7A90A4;font-size:20px;cursor:pointer;padding:0;line-height:1;">&times;</button>
-            <h3 style="margin:0 0 4px 0;font-size:20px;font-weight:700;color:#000000;">Gestor de censura</h3>
-            <p style="margin:0;font-size:13px;color:#7A90A4;">Devuelve el texto original después de la censura</p>
+            <h3 style="margin:0 0 4px 0;font-size:20px;font-weight:700;color:#000000;pointer-events:none;">Gestor de censura</h3>
+            <p style="margin:0;font-size:13px;color:#7A90A4;pointer-events:none;">Devuelve el texto original despu\u00e9s de la censura</p>
         </div>
 
         <label style="font-size:14px;font-weight:600;color:#1C2B3A;display:block;margin-bottom:8px;">
@@ -168,7 +168,54 @@ function crearPanel(mapaTokens, onRevertirPrompt) {
     document.body.appendChild(overlay);
     document.body.appendChild(panel);
 
-    const cerrar = () => { overlay.remove(); panel.remove(); };
+    // Lógica para arrastrar el panel
+    const header = panel.querySelector("#sp-panel-header");
+    let isDraggingPanel = false;
+    let dragStartX, dragStartY;
+    let initialLeft, initialTop;
+
+    header.addEventListener("mousedown", (e) => {
+        if (e.target.id === "sp-cerrar") return;
+        isDraggingPanel = true;
+        header.style.cursor = "grabbing";
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+
+        const rect = panel.getBoundingClientRect();
+        panel.style.bottom = "auto";
+        panel.style.right = "auto";
+        panel.style.left = rect.left + "px";
+        panel.style.top = rect.top + "px";
+        
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        e.preventDefault();
+    });
+
+    const onMouseMove = (e) => {
+        if (!isDraggingPanel) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        panel.style.left = (initialLeft + dx) + "px";
+        panel.style.top = (initialTop + dy) + "px";
+    };
+
+    const onMouseUp = () => {
+        if (isDraggingPanel) {
+            isDraggingPanel = false;
+            header.style.cursor = "grab";
+        }
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+
+    const cerrar = () => { 
+        overlay.remove(); 
+        panel.remove(); 
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+    };
     overlay.addEventListener("click", cerrar);
     panel.querySelector("#sp-cerrar").addEventListener("click", cerrar);
 
