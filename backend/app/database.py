@@ -21,50 +21,25 @@ def get_connection():
 # ── Crear las tablas si no existen ───────────────
 # Esta función se ejecuta al iniciar el servidor.
 # CREATE TABLE IF NOT EXISTS evita error si ya existe.
+
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Tabla de prompts (ya existe)
+    # Tabla prompts con user_id para separar por usuario
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS prompts (
-            id             INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo         TEXT NOT NULL,
-            contenido      TEXT NOT NULL,
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id          TEXT NOT NULL,
+            titulo           TEXT NOT NULL,
+            contenido        TEXT NOT NULL,
             contenido_limpio TEXT NOT NULL,
-            categoria      TEXT NOT NULL,
-            icono          TEXT NOT NULL DEFAULT 'ti-file-text',
-            fecha_creacion TEXT NOT NULL
+            categoria        TEXT NOT NULL,
+            fecha_creacion   TEXT NOT NULL
         )
     """)
 
-    # Migrar base de datos existente si es necesario
-    try:
-        cursor.execute("ALTER TABLE prompts ADD COLUMN icono TEXT DEFAULT 'ti-file-text'")
-    except sqlite3.OperationalError:
-        pass # La columna ya existe
-
-    # Tablas para el sistema de Etiquetas (Tags)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tags (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre      TEXT NOT NULL UNIQUE,
-            color       TEXT NOT NULL DEFAULT '#E0E0E0'
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS prompt_tags (
-            prompt_id   INTEGER NOT NULL,
-            tag_id      INTEGER NOT NULL,
-            PRIMARY KEY (prompt_id, tag_id),
-            FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE,
-            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-        )
-    """)
-
-    # Tabla nueva — guarda el mapa token → dato real
-    # Cada token está relacionado con un prompt por prompt_id
+    # Tabla tokens relacionada con prompts
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tokens (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,19 +51,6 @@ def init_db():
         )
     """)
 
-    # Tabla de historial — registra cada uso de la extensión
-    # plataforma: ChatGPT, Claude, Gemini, etc.
-    # accion: "analisis" cuando se analiza un prompt
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS historial (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            plataforma  TEXT NOT NULL,
-            accion      TEXT NOT NULL DEFAULT 'analisis',
-            fecha       TEXT NOT NULL,
-            hora        TEXT NOT NULL
-        )
-    """)
-
     conn.commit()
     conn.close()
-    print("[OK] Base de datos inicializada correctamente")
+    print("✅ Base de datos inicializada correctamente")
