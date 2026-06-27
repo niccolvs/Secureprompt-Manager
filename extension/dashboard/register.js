@@ -26,7 +26,6 @@ const registerForm = document.getElementById("register-form");
 const inputNombre  = document.getElementById("input-nombre");
 const inputEmail   = document.getElementById("input-email");
 const inputPass    = document.getElementById("input-password");
-const inputConfirm = document.getElementById("input-confirm");
 const btnSubmit    = document.getElementById("btn-submit");
 const btnGoogle    = document.getElementById("btn-google");
 
@@ -49,23 +48,19 @@ registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const nombre   = inputNombre.value.trim();
+  const apellido = document.getElementById("input-apellido").value.trim();
+  const nombreCompleto = nombre + " " + apellido;
   const email    = inputEmail.value.trim();
   const password = inputPass.value.trim();
-  const confirm  = inputConfirm.value.trim();
 
   // Validaciones
-  if (!nombre || !email || !password || !confirm) {
+  if (!nombre || !apellido || !email || !password) {
     mostrarError("Por favor completa todos los campos");
     return;
   }
 
   if (password.length < 6) {
     mostrarError("La contraseña debe tener al menos 6 caracteres");
-    return;
-  }
-
-  if (password !== confirm) {
-    mostrarError("Las contraseñas no coinciden");
     return;
   }
 
@@ -78,7 +73,7 @@ registerForm.addEventListener("submit", async (e) => {
 
     // Guardar el nombre del usuario en Firebase
     await userCredential.user.updateProfile({
-      displayName: nombre
+      displayName: nombreCompleto
     });
 
     mostrarError("✅ Cuenta creada correctamente, redirigiendo...", true);
