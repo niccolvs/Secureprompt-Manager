@@ -53,33 +53,23 @@ def obtener_tags():
 # Analiza el prompt con SpaCy y guarda todo en SQLite
 @router.post("/prompts")
 def crear_prompt(prompt: PromptCreate):
-    # 1. Analizar el prompt con SpaCy
-    resultado = analizar_prompt(prompt.contenido)
-
     conn = get_connection()
     cursor = conn.cursor()
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    # 2. Guardar el prompt con el texto limpio
+    # Guardar la plantilla sin censurarla
     cursor.execute("""
         INSERT INTO prompts (titulo, contenido, contenido_limpio, categoria, fecha_creacion)
         VALUES (?, ?, ?, ?, ?)
     """, (
         prompt.titulo,
         prompt.contenido,
-        resultado["texto_limpio"],
+        prompt.contenido, # No se filtra, se guarda tal cual
         prompt.categoria,
         fecha
     ))
 
     prompt_id = cursor.lastrowid
-
-    # 3. Guardar cada token detectado por SpaCy
-    for token, datos in resultado["entidades_detectadas"].items():
-        cursor.execute("""
-            INSERT INTO tokens (prompt_id, token, valor_real, tipo)
-            VALUES (?, ?, ?, ?)
-        """, (prompt_id, token, datos["valor_real"], datos["tipo"]))
 
     # 4. Guardar etiquetas (Tags)
     for tag_name in prompt.tags:
@@ -101,11 +91,8 @@ def crear_prompt(prompt: PromptCreate):
     conn.close()
 
     return {
-        "mensaje": "Prompt guardado y analizado",
-        "prompt_id": prompt_id,
-        "texto_limpio": resultado["texto_limpio"],
-        "entidades_detectadas": resultado["entidades_detectadas"],
-        "total_entidades": resultado["total_entidades"]
+        "mensaje": "Prompt guardado",
+        "prompt_id": prompt_id
     }
 
 
@@ -140,22 +127,14 @@ def actualizar_prompt(prompt_id: int, prompt: PromptCreate):
         conn.close()
         raise HTTPException(status_code=404, detail="Prompt no encontrado")
 
-    # Re-analizar el prompt
-    resultado = analizar_prompt(prompt.contenido)
-
     cursor.execute("""
         UPDATE prompts
         SET titulo = ?, contenido = ?, contenido_limpio = ?, categoria = ?
         WHERE id = ?
-    """, (prompt.titulo, prompt.contenido, resultado["texto_limpio"], prompt.categoria, prompt_id))
+    """, (prompt.titulo, prompt.contenido, prompt.contenido, prompt.categoria, prompt_id))
 
-    # Actualizar tokens
+    # Limpiar tokens anteriores si los hubiera
     cursor.execute("DELETE FROM tokens WHERE prompt_id = ?", (prompt_id,))
-    for token, datos in resultado["entidades_detectadas"].items():
-        cursor.execute("""
-            INSERT INTO tokens (prompt_id, token, valor_real, tipo)
-            VALUES (?, ?, ?, ?)
-        """, (prompt_id, token, datos["valor_real"], datos["tipo"]))
 
     # Actualizar tags
     cursor.execute("DELETE FROM prompt_tags WHERE prompt_id = ?", (prompt_id,))
@@ -175,8 +154,7 @@ def actualizar_prompt(prompt_id: int, prompt: PromptCreate):
     conn.close()
 
     return {
-        "mensaje": f"Prompt {prompt_id} actualizado",
-        "total_entidades": resultado["total_entidades"]
+        "mensaje": f"Prompt {prompt_id} actualizado"
     }
 
 # ── PATCH /prompts/{id}/icono ─────────────────────
@@ -267,9 +245,9 @@ def registrar_historial(entry: HistorialCreate):
     hora = ahora.strftime("%H:%M")
 
     cursor.execute("""
-        INSERT INTO historial (plataforma, accion, fecha, hora)
-        VALUES (?, ?, ?, ?)
-    """, (entry.plataforma, entry.accion, fecha, hora))
+        INSERT INTO historial (plataforma, accion, texto_censurado, fecha, hora)
+        VALUES (?, ?, ?, ?, ?)
+    """, (entry.plataforma, entry.accion, entry.texto_censurado, fecha, hora))
 
     conn.commit()
     conn.close()

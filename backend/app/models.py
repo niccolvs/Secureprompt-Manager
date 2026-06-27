@@ -40,3 +40,4 @@ class PromptResponse(BaseModel):
 class HistorialCreate(BaseModel):
     plataforma: str    # Ej: "ChatGPT", "Claude", "Gemini"
     accion: str = "analisis"  # Tipo de acción realizada
+    texto_censurado: Optional[str] = None # El texto original analizado

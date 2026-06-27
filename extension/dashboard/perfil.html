@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Dashboard del Secure Prompt Manager — gestiona tu historial, estadísticas y prompts guardados de forma segura." />
+  <title>Dashboard — SecurePrompt Manager</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Emoji Picker Element -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+
+  <!-- Guard: redirige a login si no hay sesión activa -->
+  <script>
+    const _cfg = {
+      apiKey: "AIzaSyCfJornBnJQnMU0r2qjBOUTTjG2i82ATgw",
+      authDomain: "prompt-manager-1f2c5.firebaseapp.com",
+      projectId: "prompt-manager-1f2c5",
+      storageBucket: "prompt-manager-1f2c5.firebasestorage.app",
+      messagingSenderId: "1059291715077",
+      appId: "1:1059291715077:web:580fd43dfe54888f9f2e6c"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(_cfg);
+    const _auth = firebase.auth();
+    const _storage = firebase.storage();
+
+    document.documentElement.style.visibility = "hidden";
+    _auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        document.documentElement.style.visibility = "";
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
+    Dashboard del Secure Prompt Manager — muestra historial, estadísticas y prompts guardados
+  </h2>
+
+  <div class="spm-root" id="app">
+    <!-- ── Sidebar ── -->
+    <div class="spm-sidebar">
+      <div class="spm-logo">
+        <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager"
+          style="max-width:140px;height:auto;display:block" />
+      </div>
+      <nav id="sidenav" aria-label="Navegación principal"></nav>
+      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesión" id="btn-logout">
+        <i class="ti ti-logout" aria-hidden="true" style="font-size:16px"></i>
+        Cerrar sesión
+      </div>
+    </div>
+
+    <!-- ── Contenido principal ── -->
+    <div class="spm-main">
+      <div class="spm-topbar">
+        <h1 class="spm-title" id="greeting">Hola!</h1>
+        <div class="spm-user">
+          <i id="theme-toggle" class="ti ti-moon" aria-hidden="true"
+            style="font-size:18px;color:#6A8099;cursor:pointer;" title="Cambiar tema"></i>
+          <div style="text-align:right">
+            <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
+            <div style="font-size:11px;color:#6A8099" id="user-email"></div>
+          </div>
+          <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;"
+            onclick="activeNav='Perfil'; renderNav();"></div>
+        </div>
+      </div>
+
+      <!-- VISTA PERFIL -->
+      <div id="view-perfil" style="display: flex; align-items: center; justify-content: center; gap: 60px; flex: 1;">
+        <section class="profile-section">
+          <div class="avatar-wrapper">
+            <div class="avatar-circle" id="profile-avatar"></div>
+            <div class="camera-badge" id="btn-camera" title="Cambiar foto">
+              <i class="ti ti-camera"></i>
+            </div>
+            <input type="file" id="avatar-upload" accept="image/png, image/jpeg, image/webp" style="display: none;">
+          </div>
+          <h1 class="profile-name" id="profile-name"></h1>
+          <p class="profile-email" id="profile-email-lbl"></p>
+          <div class="profile-actions">
+            <button class="btn-outline">Editar perfil</button>
+            <button class="btn-outline">Ajustes</button>
+          </div>
+        </section>
+
+        <section class="linked-accounts-card">
+          <h2 class="card-title">Cuentas enlazadas</h2>
+          <div class="account-list">
+            <div class="account-item"><span>ChatGPT</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="account-item"><span>Gemini</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="account-item"><span>Claude</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="account-item"><span>Deepseek</span>
+              <div class="toggle-switch"></div>
+            </div>
+            <div class="account-item"><span>Manus</span>
+              <div class="toggle-switch"></div>
+            </div>
+          </div>
+        </section>
+      </div> <!-- Fin VISTA PERFIL -->
+    </div>
+  </div>
+
+  <div id="emoji-picker-container"
+    style="display:none; position: absolute; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px;">
+    <emoji-picker></emoji-picker>
+  </div>
+
+  
+
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+    let activeNav = "Perfil";
+
+    function renderNav() {
+      const nav = document.getElementById("sidenav");
+      if (!nav) return;
+      nav.innerHTML = `
+        <a href="dashboard.html" class="spm-nav-item ${activeNav === 'Dashboard' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Dashboard</a>
+        <a href="prompts.html" class="spm-nav-item ${activeNav === 'Tus prompts' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Tus prompts</a>
+        <a href="historial.html" class="spm-nav-item ${activeNav === 'Historial' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Historial</a>
+        <a href="perfil.html" class="spm-nav-item ${activeNav === 'Perfil' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Perfil</a>
+      `;
+    }
+
+    // ── Tema Oscuro ──────────────────────────────
+    const themeToggle = document.getElementById("theme-toggle");
+    if (themeToggle) {
+        if (localStorage.getItem("theme") === "dark") {
+          document.body.classList.add("dark-mode");
+          themeToggle.classList.remove("ti-moon");
+          themeToggle.classList.add("ti-sun");
+        }
+        themeToggle.addEventListener("click", () => {
+          document.body.classList.toggle("dark-mode");
+          const isDark = document.body.classList.contains("dark-mode");
+          localStorage.setItem("theme", isDark ? "dark" : "light");
+          if (isDark) {
+            themeToggle.classList.remove("ti-moon");
+            themeToggle.classList.add("ti-sun");
+          } else {
+            themeToggle.classList.remove("ti-sun");
+            themeToggle.classList.add("ti-moon");
+          }
+        });
+    }
+    
+    // ── Auth y Header ────────────────────────────
+    if (typeof firebase !== 'undefined') {
+        // _auth was initialized in head
+        _auth.onAuthStateChanged(user => {
+            if (!user) {
+              window.location.replace("login.html");
+            } else {
+              let firstName = "Usuario";
+              if (user.displayName) {
+                firstName = user.displayName.split(" ")[0];
+              }
+              const greetingEl = document.getElementById("greeting");
+              if (greetingEl) greetingEl.textContent = `Hola, ${firstName}!`;
+              
+              const nameEl = document.getElementById("user-name");
+              if (nameEl) nameEl.textContent = user.displayName || user.email;
+              
+              const emailEl = document.getElementById("user-email");
+              if (emailEl) emailEl.textContent = user.email;
+              
+              if (user.photoURL) {
+                const imgHtml = `<img src="${user.photoURL}" alt="Foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                const topAvatar = document.getElementById("user-avatar");
+                if (topAvatar) topAvatar.innerHTML = imgHtml;
+                const profileAvatar = document.getElementById("profile-avatar");
+                if (profileAvatar) profileAvatar.innerHTML = imgHtml;
+              }
+            }
+        });
+        
+        const btnLogout = document.getElementById("btn-logout");
+        if (btnLogout) {
+            btnLogout.addEventListener("click", () => {
+              _auth.signOut().then(() => window.location.replace("login.html"));
+            });
+        }
+    }
+
+    const btnCamera = document.getElementById("btn-camera");
+    const avatarUpload = document.getElementById("avatar-upload");
+    if (btnCamera && avatarUpload) {
+        btnCamera.addEventListener("click", () => avatarUpload.click());
+        avatarUpload.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const user = firebase.auth().currentUser;
+          if (!user) return;
+          try {
+            const profileAvatarEl = document.getElementById("profile-avatar");
+            const topAvatarEl = document.getElementById("user-avatar");
+            profileAvatarEl.innerHTML = '<i class="ti ti-loader" style="animation: spin 1s linear infinite;"></i>';
+            const storageRef = firebase.storage().ref();
+            const avatarRef = storageRef.child(`avatars/${user.uid}`);
+            await avatarRef.put(file);
+            const downloadURL = await avatarRef.getDownloadURL();
+            await user.updateProfile({ photoURL: downloadURL });
+            const imgHtml = `<img src="${downloadURL}" alt="Foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            profileAvatarEl.innerHTML = imgHtml;
+            profileAvatarEl.classList.remove("avatar-initials");
+            if (topAvatarEl) topAvatarEl.innerHTML = imgHtml;
+          } catch (error) {
+            console.error("Error al subir imagen:", error);
+            alert("Hubo un error al subir la imagen.");
+          }
+        });
+    }
+
+    renderNav();
+  </script>
+</body>
+</html>
+
