@@ -259,9 +259,7 @@ function crearBotonFlotante() {
     // Creamos el contenido del boton, el logo y el texto
     const iconSpan = document.createElement("img");
     iconSpan.src = chrome.runtime.getURL("assets/logo/SPM_logo_extension.png");
-    iconSpan.style.width = "22px";
-    iconSpan.style.height = "22px";
-    iconSpan.style.pointerEvents = "none";
+    iconSpan.style.cssText = "width:44px;height:44px;object-fit:cover;border-radius:50%;pointer-events:none;flex-shrink:0;";
 
     const labelSpan = document.createElement("span");
     labelSpan.textContent = "Anonimizar";
@@ -297,7 +295,7 @@ function crearBotonFlotante() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "0 14px",
+        padding: "0",
         overflow: "hidden",
         userSelect: "none",
         transition: "width 0.25s ease, border-radius 0.25s ease, background-color 0.2s ease",
@@ -314,6 +312,9 @@ function crearBotonFlotante() {
         boton.style.width = "165px";
         boton.style.borderRadius = "25px";
         boton.style.backgroundColor = "#A5BFD8";
+        boton.style.padding = "0 12px";
+        iconSpan.style.width = "28px";
+        iconSpan.style.height = "28px";
         labelSpan.style.opacity = "1";
         labelSpan.style.maxWidth = "130px";
         labelSpan.style.marginLeft = "6px";
@@ -325,6 +326,9 @@ function crearBotonFlotante() {
         boton.style.width = "44px";
         boton.style.borderRadius = "50%";
         boton.style.backgroundColor = "#C0D4E8";
+        boton.style.padding = "0";
+        iconSpan.style.width = "44px";
+        iconSpan.style.height = "44px";
         labelSpan.style.opacity = "0";
         labelSpan.style.maxWidth = "0";
         labelSpan.style.marginLeft = "0";
