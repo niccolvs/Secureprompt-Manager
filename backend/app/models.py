@@ -22,6 +22,10 @@ class PromptCreate(BaseModel):
     categoria: str = "" # Mantenido por compatibilidad
     tags: List[str] = [] # Nombres de las etiquetas seleccionadas/creadas
 
+# ── Modelo para actualizar ícono de un prompt ────
+class PromptIconUpdate(BaseModel):
+    icono: str
+
 # ── Modelo para devolver un prompt ───────────────
 # Esto es lo que el servidor responderá
 class PromptResponse(BaseModel):
@@ -36,3 +40,4 @@ class PromptResponse(BaseModel):
 class HistorialCreate(BaseModel):
     plataforma: str    # Ej: "ChatGPT", "Claude", "Gemini"
     accion: str = "analisis"  # Tipo de acción realizada
+    texto_censurado: Optional[str] = None # El texto original analizado
