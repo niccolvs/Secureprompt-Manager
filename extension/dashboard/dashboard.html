@@ -109,7 +109,7 @@
       <div class="spm-topbar">
         <h1 class="spm-title" id="greeting">Hola!</h1>
         <div class="spm-user">
-          <i class="ti ti-bell" aria-hidden="true" style="font-size:18px;color:#6A8099"></i>
+          <i id="theme-toggle" class="ti ti-moon" aria-hidden="true" style="font-size:18px;color:#6A8099;cursor:pointer;" title="Cambiar tema"></i>
           <div style="text-align:right">
             <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
             <div style="font-size:11px;color:#6A8099" id="user-email"></div>
@@ -816,6 +816,29 @@
       }
     }
   </style>
-</body>
+  <script>
+    const themeToggle = document.getElementById("theme-toggle");
+    
+    // Check local storage for theme
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+      themeToggle.classList.remove("ti-moon");
+      themeToggle.classList.add("ti-sun");
+    }
 
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const isDark = document.body.classList.contains("dark-mode");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      
+      if (isDark) {
+        themeToggle.classList.remove("ti-moon");
+        themeToggle.classList.add("ti-sun");
+      } else {
+        themeToggle.classList.remove("ti-sun");
+        themeToggle.classList.add("ti-moon");
+      }
+    });
+  </script>
+</body>
 </html>

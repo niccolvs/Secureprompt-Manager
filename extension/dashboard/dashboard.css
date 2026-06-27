@@ -573,3 +573,86 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* ── Dark Mode ── */
+body.dark-mode, 
+body.dark-mode .spm-root, 
+body.dark-mode .spm-main {
+  background: #0B1120;
+}
+
+body.dark-mode,
+body.dark-mode .spm-title,
+body.dark-mode .spm-h2,
+body.dark-mode .spm-section-title,
+body.dark-mode #user-name,
+body.dark-mode .spm-card-title,
+body.dark-mode .spm-stat-num,
+body.dark-mode .spm-stat-lbl,
+body.dark-mode .spm-hist-row,
+body.dark-mode .profile-name,
+body.dark-mode .profile-email,
+body.dark-mode .card-title,
+body.dark-mode .account-item,
+body.dark-mode .spm-prompt-item,
+body.dark-mode .spm-detail p {
+  color: #ffffff !important;
+}
+
+/* Fix chart SVG text colors */
+body.dark-mode text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .spm-stats,
+body.dark-mode .spm-card,
+body.dark-mode .spm-modal-content,
+body.dark-mode .linked-accounts-card,
+body.dark-mode .spm-detail,
+body.dark-mode .spm-prompt-item {
+  background: #1C2B3A !important;
+  border-color: #2C3D58 !important;
+}
+
+body.dark-mode .spm-prompt-item.sel {
+  background: #2C3D58 !important;
+}
+
+body.dark-mode .spm-stat-row + .spm-stat-row {
+  border-top-color: #2C3D58 !important;
+}
+
+body.dark-mode .spm-input,
+body.dark-mode .spm-textarea,
+body.dark-mode .spm-select {
+  background: #0B1120 !important;
+  border-color: #2C3D58 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .spm-input:focus,
+body.dark-mode .spm-textarea:focus,
+body.dark-mode .spm-select:focus {
+  border-color: #5C7FA3 !important;
+}
+
+body.dark-mode #user-email,
+body.dark-mode .spm-empty-state,
+body.dark-mode .spm-empty-state i,
+body.dark-mode .empty-sub,
+body.dark-mode .spm-detail div {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .spm-tag {
+  color: #ffffff !important;
+  background: #2C3D58 !important;
+}
+
+body.dark-mode .spm-btn-ghost,
+body.dark-mode .btn-outline {
+  background: transparent !important;
+  border: 1px solid #5C7FA3 !important;
+  color: #ffffff !important;
+}
