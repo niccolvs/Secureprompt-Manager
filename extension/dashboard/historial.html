@@ -317,9 +317,9 @@
       document.getElementById("modal-censurado").style.display = "none";
     }
 
-    async function fetchHistorial() {
+    async function fetchHistorial(userId) {
       try {
-        const res = await fetch(`${API_URL}/historial`);
+        const res = await fetch(`${API_URL}/historial/${userId}`);
         if (!res.ok) throw new Error("Error del servidor");
         const data = await res.json();
         renderHistorial(data.historial || []);
@@ -371,9 +371,11 @@
 
     async function borrarHistorial() {
       if (!confirm("¿Quieres borrar el historial?")) return;
+      const user = _auth.currentUser;
+      if (!user) return;
       try {
-        const res = await fetch(`${API_URL}/historial`, { method: "DELETE" });
-        if (res.ok) fetchHistorial();
+        const res = await fetch(`${API_URL}/historial/${user.uid}`, { method: "DELETE" });
+        if (res.ok) fetchHistorial(user.uid);
       } catch (err) {
         console.error("Error al borrar historial:", err);
       }
@@ -406,7 +408,12 @@
     });
 
     renderNav();
-    fetchHistorial();
+
+    _auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchHistorial(user.uid);
+      }
+    });
   </script>
 </body>
 </html>
