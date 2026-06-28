@@ -15,23 +15,29 @@ class TagItem(BaseModel):
     color: str = "#E0E0E0"
 
 # ── Modelo para recibir un prompt ────────────────
+# Esto es lo que la extensión nos enviará
 class PromptCreate(BaseModel):
-    user_id: str       # ID único del usuario de Firebase
-    titulo: str
-    contenido: str
-    categoria: str
+    titulo: str        # Título del prompt
+    contenido: str     # El texto del prompt
+    categoria: str = "" # Mantenido por compatibilidad
+    tags: List[str] = [] # Nombres de las etiquetas seleccionadas/creadas
+
+# ── Modelo para actualizar ícono de un prompt ────
+class PromptIconUpdate(BaseModel):
+    icono: str
 
 # ── Modelo para devolver un prompt ───────────────
+# Esto es lo que el servidor responderá
 class PromptResponse(BaseModel):
     id: int
-    user_id: str
     titulo: str
     contenido: str
-    contenido_limpio: str
     categoria: str
     fecha_creacion: str
+    tags: List[TagItem] = []
 
 # ── Modelo para registrar historial ──────────────
 class HistorialCreate(BaseModel):
     plataforma: str    # Ej: "ChatGPT", "Claude", "Gemini"
     accion: str = "analisis"  # Tipo de acción realizada
+    texto_censurado: Optional[str] = None # El texto original analizado

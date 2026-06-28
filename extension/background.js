@@ -15,11 +15,11 @@ function detectarPlataforma(url) {
 }
 
 // Registrar evento en el historial del backend
-function registrarHistorial(plataforma) {
+function registrarHistorial(plataforma, texto_censurado) {
   fetch(`${API_BASE}/historial`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plataforma, accion: "analisis" }),
+    body: JSON.stringify({ plataforma, accion: "analisis", texto_censurado }),
   }).catch((err) => console.error("SecurePrompt: Error registrando historial:", err));
 }
 
@@ -40,7 +40,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       })
       .then((data) => {
         // Registrar en historial tras análisis exitoso
-        registrarHistorial(plataforma);
+        registrarHistorial(plataforma, contenido);
         sendResponse({ success: true, data });
       })
       .catch((err) => {
