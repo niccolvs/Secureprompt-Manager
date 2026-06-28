@@ -9,13 +9,18 @@
         "storage"
     ],
     "host_permissions": [
-        "http://127.0.0.1:8000/*",
-        "https://*.googleapis.com/*",
-        "https://*.gstatic.com/*",
-        "https://cdn.jsdelivr.net/*"
+        "http://127.0.0.1:8000/*"
     ],
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js",
+        "scripts": ["background.js"],
+        "type": "module"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "secureprompt@usm.cl",
+            "strict_min_version": "109.0"
+        }
     },
     "action": {
         "default_popup": "popup/popup.html",
@@ -36,9 +41,6 @@
             ]
         }
     ],
-    "content_security_policy": {
-        "extension_pages": "script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; object-src 'self';"
-    },
     "web_accessible_resources": [
         {
             "resources": ["assets/logo/SPM_logo_extension.png"],
