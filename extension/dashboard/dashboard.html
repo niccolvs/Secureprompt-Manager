@@ -272,9 +272,9 @@
     }
 
     // ── Fetch datos del backend ───────────────────
-    async function fetchPrompts() {
+    async function fetchPrompts(userId) {
       try {
-        const res = await fetch(`${API_URL}/prompts`);
+        const res = await fetch(`${API_URL}/prompts/${userId}`);
         if (!res.ok) throw new Error("Error del servidor");
         const data = await res.json();
         promptsData = data.prompts || [];
@@ -292,19 +292,13 @@
       }
     }
 
-    let chartInstance = null;
-
-    async function fetchStats() {
+    async function fetchStats(userId) {
       try {
-        const res = await fetch(`${API_URL}/stats`);
+        const res = await fetch(`${API_URL}/stats/${userId}`);
         if (!res.ok) throw new Error("Error del servidor");
         const data = await res.json();
-        const censurasEl = document.getElementById("stat-censuras");
-        const plantillasEl = document.getElementById("stat-plantillas");
-        censurasEl.textContent = data.total_censuras || 0;
-        plantillasEl.textContent = data.plantillas_usadas || 0;
-        censurasEl.classList.add("spm-fade-in");
-        plantillasEl.classList.add("spm-fade-in");
+        document.getElementById("stat-censuras").textContent = data.total_censuras || 0;
+        document.getElementById("stat-plantillas").textContent = data.plantillas_usadas || 0;
 
         if (data.uso_plataformas && data.uso_plataformas.length > 0) {
           document.getElementById("chart-plataformas").style.display = "block";
@@ -322,6 +316,22 @@
         document.getElementById("chart-empty-state").style.display = "flex";
       }
     }
+
+    async function fetchHistorial(userId) {
+      try {
+        const res = await fetch(`${API_URL}/historial/${userId}`);
+        if (!res.ok) throw new Error("Error del servidor");
+        const data = await res.json();
+        renderHistorial(data.historial || []);
+      } catch (err) {
+        console.error("Error cargando historial:", err);
+        renderHistorial([]);
+      }
+    }
+
+    let chartInstance = null;
+
+  
 
     function renderChart(plataformas) {
       const ctx = document.getElementById('chart-plataformas').getContext('2d');
@@ -368,17 +378,7 @@
       });
     }
 
-    async function fetchHistorial() {
-      try {
-        const res = await fetch(`${API_URL}/historial`);
-        if (!res.ok) throw new Error("Error del servidor");
-        const data = await res.json();
-        renderHistorial(data.historial || []);
-      } catch (err) {
-        console.error("Error cargando historial:", err);
-        renderHistorial([]);
-      }
-    }
+    
 
     // ── Render: Historial ─────────────────────────
     function renderHistorial(historial) {
@@ -650,11 +650,13 @@
     // ── Acciones ───────────────────────────────────
     async function eliminarPrompt(id) {
       if (!confirm("¿Estás seguro de que deseas eliminar este prompt?")) return;
+      const user = _auth.currentUser;
+      if (!user) return;
       try {
-        const res = await fetch(`${API_URL}/prompts/${id}`, { method: "DELETE" });
+        const res = await fetch(`${API_URL}/prompts/${id}?user_id=${user.uid}`, { method: "DELETE" });
         if (res.ok) {
-          fetchPrompts();
-          fetchStats();
+          fetchPrompts(user.uid);
+          fetchStats(user.uid);
         }
       } catch (err) {
         console.error("Error eliminando:", err);
@@ -841,21 +843,16 @@
     async function guardarNuevoPrompt(e) {
       const btnGuardar = e.target;
       const editId = btnGuardar.dataset.editid;
+      const user = _auth.currentUser;
+      if (!user) return;
 
       const titulo = document.getElementById("prompt-titulo").value.trim();
       const contenido = document.getElementById("prompt-contenido").value.trim();
       const tags = [...modalSelectedTags];
       const categoria = tags[0] || '';
 
-      if (!titulo) {
-        alert("Por favor completa el título.");
-        return;
-      }
-
-      if (tags.length === 0) {
-        alert("Agrega al menos una etiqueta.");
-        return;
-      }
+      if (!titulo) { alert("Por favor completa el título."); return; }
+      if (tags.length === 0) { alert("Agrega al menos una etiqueta."); return; }
 
       const btnTextoOriginal = btnGuardar.innerText;
       btnGuardar.innerText = "Guardando...";
@@ -872,22 +869,19 @@
         const response = await fetch(url, {
           method: method,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, contenido, categoria, tags })
+          body: JSON.stringify({ user_id: user.uid, titulo, contenido, categoria, tags })
         });
 
         if (!response.ok) throw new Error("Error al guardar");
 
-        const data = await response.json();
         cerrarModal();
-
-        // Recargar datos
-        fetchPrompts();
-        fetchStats();
+        fetchPrompts(user.uid);
+        fetchStats(user.uid);
         fetchTags();
 
       } catch (error) {
         console.error(error);
-        alert("Error al intentar guardar el prompt. Revisa que FastAPI esté encendido.");
+        alert("Error al guardar el prompt.");
         btnGuardar.innerText = btnTextoOriginal;
         btnGuardar.disabled = false;
       }
@@ -905,11 +899,15 @@
     // ── Inicialización ────────────────────────────
     renderNav();
 
-    // Cargar datos del backend
-    fetchPrompts();
-    fetchStats();
-    fetchHistorial();
-    fetchTags();
+    // Esperar a Firebase antes de cargar datos
+    _auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchPrompts(user.uid);
+        fetchStats(user.uid);
+        fetchHistorial(user.uid);
+        fetchTags();
+      }
+    });
 
     // ── Lógica Emoji Picker ───────────────────────
     let currentEmojiPromptId = null;

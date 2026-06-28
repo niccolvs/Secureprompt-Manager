@@ -25,73 +25,92 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Tabla de prompts (ya existe)
+    # Tabla de prompts con user_id
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS prompts (
-            id             INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo         TEXT NOT NULL,
-            contenido      TEXT NOT NULL,
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id          TEXT NOT NULL DEFAULT '',
+            titulo           TEXT NOT NULL,
+            contenido        TEXT NOT NULL,
             contenido_limpio TEXT NOT NULL,
-            categoria      TEXT NOT NULL,
-            icono          TEXT NOT NULL DEFAULT 'ti-file-text',
-            fecha_creacion TEXT NOT NULL
+            categoria        TEXT NOT NULL,
+            icono            TEXT NOT NULL DEFAULT 'ti-file-text',
+            fecha_creacion   TEXT NOT NULL
         )
     """)
 
-    # Migrar base de datos existente si es necesario
-    try:
-        cursor.execute("ALTER TABLE prompts ADD COLUMN icono TEXT DEFAULT 'ti-file-text'")
-    except sqlite3.OperationalError:
-        pass # La columna ya existe
+    # Migraciones de columnas si no existen
+    for migration in [
+        "ALTER TABLE prompts ADD COLUMN icono TEXT DEFAULT 'ti-file-text'",
+        "ALTER TABLE prompts ADD COLUMN user_id TEXT DEFAULT ''",
+    ]:
+        try:
+            cursor.execute(migration)
+        except sqlite3.OperationalError:
+            pass
 
     # Tablas para el sistema de Etiquetas (Tags)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tags (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre      TEXT NOT NULL UNIQUE,
-            color       TEXT NOT NULL DEFAULT '#E0E0E0'
+            id     INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL UNIQUE,
+            color  TEXT NOT NULL DEFAULT '#E0E0E0'
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS prompt_tags (
-            prompt_id   INTEGER NOT NULL,
-            tag_id      INTEGER NOT NULL,
+            prompt_id INTEGER NOT NULL,
+            tag_id    INTEGER NOT NULL,
             PRIMARY KEY (prompt_id, tag_id),
             FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE,
-            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+            FOREIGN KEY (tag_id)    REFERENCES tags(id)    ON DELETE CASCADE
         )
     """)
 
-    # Tabla nueva — guarda el mapa token → dato real
-    # Cada token está relacionado con un prompt por prompt_id
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tokens (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            prompt_id   INTEGER NOT NULL,
-            token       TEXT NOT NULL,
-            valor_real  TEXT NOT NULL,
-            tipo        TEXT NOT NULL,
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            prompt_id  INTEGER NOT NULL,
+            token      TEXT NOT NULL,
+            valor_real TEXT NOT NULL,
+            tipo       TEXT NOT NULL,
             FOREIGN KEY (prompt_id) REFERENCES prompts(id)
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS historial (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            plataforma  TEXT NOT NULL,
-            accion      TEXT NOT NULL DEFAULT 'analisis',
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id         TEXT NOT NULL DEFAULT '',
+            plataforma      TEXT NOT NULL,
+            accion          TEXT NOT NULL DEFAULT 'analisis',
             texto_censurado TEXT,
-            fecha       TEXT NOT NULL,
-            hora        TEXT NOT NULL
+            fecha           TEXT NOT NULL,
+            hora            TEXT NOT NULL
         )
     """)
 
-    # Migrar base de datos existente si es necesario para historial
-    try:
-        cursor.execute("ALTER TABLE historial ADD COLUMN texto_censurado TEXT")
-    except sqlite3.OperationalError:
-        pass # La columna ya existe
+    # Migraciones de columnas para historial
+    for migration in [
+        "ALTER TABLE historial ADD COLUMN texto_censurado TEXT",
+        "ALTER TABLE historial ADD COLUMN user_id TEXT DEFAULT ''",
+    ]:
+        try:
+            cursor.execute(migration)
+        except sqlite3.OperationalError:
+            pass
+
+    # Tabla de usuarios para avatar
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            user_id    TEXT PRIMARY KEY,
+            avatar     TEXT,
+            nombre     TEXT,
+            email      TEXT,
+            updated_at TEXT
+        )
+    """)
 
     conn.commit()
     conn.close()

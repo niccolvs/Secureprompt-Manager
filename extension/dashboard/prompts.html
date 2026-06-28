@@ -191,9 +191,9 @@
 
 
     // ── Fetch datos del backend ───────────────────
-    async function fetchPrompts() {
+    async function fetchPrompts(userId) {
       try {
-        const res = await fetch(`${API_URL}/prompts`);
+        const res = await fetch(`${API_URL}/prompts/${userId}`);
         if (!res.ok) throw new Error("Error del servidor");
         const data = await res.json();
         promptsData = data.prompts || [];
@@ -202,8 +202,65 @@
       } catch (err) {
         console.error("Error cargando prompts:", err);
         promptsData = [];
-        selectedId = null;
         renderFullPrompts();
+      }
+    }
+
+    async function eliminarPrompt(id) {
+      if (!confirm("¿Estás seguro de que deseas eliminar este prompt?")) return;
+      const user = _auth.currentUser;
+      if (!user) return;
+      try {
+        const res = await fetch(`${API_URL}/prompts/${id}?user_id=${user.uid}`, { method: "DELETE" });
+        if (res.ok) fetchPrompts(user.uid);
+      } catch (err) {
+        console.error("Error eliminando:", err);
+      }
+    }
+
+    async function guardarNuevoPrompt(e) {
+      const btnGuardar = e.target;
+      const editId = btnGuardar.dataset.editid;
+      const user = _auth.currentUser;
+      if (!user) return;
+
+      const titulo = document.getElementById("prompt-titulo").value.trim();
+      const contenido = document.getElementById("prompt-contenido").value.trim();
+      const tags = [...modalSelectedTags];
+      const categoria = tags[0] || '';
+
+      if (!titulo) { alert("Por favor completa el título."); return; }
+      if (tags.length === 0) { alert("Agrega al menos una etiqueta."); return; }
+
+      const btnTextoOriginal = btnGuardar.innerText;
+      btnGuardar.innerText = "Guardando...";
+      btnGuardar.disabled = true;
+
+      try {
+        let url = `${API_URL}/prompts`;
+        let method = "POST";
+        if (editId) {
+          url = `${API_URL}/prompts/${editId}`;
+          method = "PUT";
+        }
+
+        const response = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: user.uid, titulo, contenido, categoria, tags })
+        });
+
+        if (!response.ok) throw new Error("Error al guardar");
+
+        cerrarModal();
+        fetchPrompts(user.uid);
+        fetchTags();
+
+      } catch (error) {
+        console.error(error);
+        alert("Error al guardar el prompt.");
+        btnGuardar.innerText = btnTextoOriginal;
+        btnGuardar.disabled = false;
       }
     }
 
@@ -563,18 +620,7 @@
     }
 
     // ── Acciones ───────────────────────────────────
-    async function eliminarPrompt(id) {
-      if (!confirm("¿Estás seguro de que deseas eliminar este prompt?")) return;
-      try {
-        const res = await fetch(`${API_URL}/prompts/${id}`, { method: "DELETE" });
-        if (res.ok) {
-          fetchPrompts();
-          // fetchStats();
-        }
-      } catch (err) {
-        console.error("Error eliminando:", err);
-      }
-    }
+    
 
     function copiarPrompt(texto) {
       navigator.clipboard.writeText(texto)
@@ -753,60 +799,7 @@
       if (modal) modal.remove();
     }
 
-    async function guardarNuevoPrompt(e) {
-      const btnGuardar = e.target;
-      const editId = btnGuardar.dataset.editid;
-
-      const titulo = document.getElementById("prompt-titulo").value.trim();
-      const contenido = document.getElementById("prompt-contenido").value.trim();
-      const tags = [...modalSelectedTags];
-      const categoria = tags[0] || '';
-
-      if (!titulo) {
-        alert("Por favor completa el título.");
-        return;
-      }
-
-      if (tags.length === 0) {
-        alert("Agrega al menos una etiqueta.");
-        return;
-      }
-
-      const btnTextoOriginal = btnGuardar.innerText;
-      btnGuardar.innerText = "Guardando...";
-      btnGuardar.disabled = true;
-
-      try {
-        let url = `${API_URL}/prompts`;
-        let method = "POST";
-        if (editId) {
-          url = `${API_URL}/prompts/${editId}`;
-          method = "PUT";
-        }
-
-        const response = await fetch(url, {
-          method: method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, contenido, categoria, tags })
-        });
-
-        if (!response.ok) throw new Error("Error al guardar");
-
-        const data = await response.json();
-        cerrarModal();
-
-        // Recargar datos
-        fetchPrompts();
-        // fetchStats();
-        fetchTags();
-
-      } catch (error) {
-        console.error(error);
-        alert("Error al intentar guardar el prompt. Revisa que FastAPI esté encendido.");
-        btnGuardar.innerText = btnTextoOriginal;
-        btnGuardar.disabled = false;
-      }
-    }
+    
 
     // ── Error de conexión ─────────────────────────
     function showConnError() {
@@ -817,12 +810,14 @@
       document.getElementById("conn-error").style.display = "none";
     }
 
-    // ── Inicialización ────────────────────────────
     renderNav();
 
-    // Cargar datos del backend
-    fetchPrompts();
-    fetchTags();
+    _auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchPrompts(user.uid);
+        fetchTags();
+      }
+    });
 
     // ── Lógica Emoji Picker ───────────────────────
     let currentEmojiPromptId = null;
