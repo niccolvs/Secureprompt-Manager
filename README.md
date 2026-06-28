@@ -10,5 +10,5 @@ Extensión de navegador con backend FastAPI + SpaCy + SQLite.
 |-----|--------|
 | Frontend | @DavidRetuerto |
 | Frontend | @ |
-| Backend API | @ |
-| Backend DB | @ |
+| Backend API | @Lorenx003 @niccolvs|
+| Backend DB | @Lorenx003 @niccolvs|
