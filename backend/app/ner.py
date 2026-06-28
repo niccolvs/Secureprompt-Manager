@@ -40,7 +40,7 @@ REGIONES_CHILE = [
     "Metropolitana", "Biobío", "Araucanía", "Los Lagos", "Maule",
     "Ñuble", "O'Higgins", "Atacama", "Tarapacá", "Aysén", "Magallanes",
     "Los Ríos", "Arica y Parinacota", "Antofagasta",
-    # Nombres completos de las regiojnes, en caso de que el usuario utilice cualquiera de las dos formar
+    # Nombres completos de las regiones, en caso de que el usuario utilice cualquiera de las dos formar
     "Región Metropolitana", "Región del Biobío", "Región de La Araucanía",
     "Región de Los Lagos", "Región del Maule", "Región de Ñuble",
     "Región del Libertador", "Región de Atacama", "Región de Tarapacá",

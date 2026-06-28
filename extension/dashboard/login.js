@@ -13,7 +13,7 @@ const firebaseConfig = {
 // ID de cliente OAuth de tu proyecto (Google Cloud Console)
 // Consola Firebase → Configuración del proyecto → General → Tus apps → OAuth 2.0
 // También en: console.cloud.google.com → APIs → Credenciales → ID de cliente web
-const GOOGLE_CLIENT_ID = "1059291715077-REEMPLAZA_CON_TU_CLIENT_ID.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "1059291715077-j8fsb70pi3f2i07qcd4oh7dn485s0qis.apps.googleusercontent.com";
 
 // ── Inicializar Firebase ──────────────────────────
 firebase.initializeApp(firebaseConfig);

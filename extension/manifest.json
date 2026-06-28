@@ -11,15 +11,20 @@
     },
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "identity"
     ],
+    "oauth2": {
+        "client_id": "1059291715077-j8fsb70pi3f2i07qcd4oh7dn485s0qis.apps.googleusercontent.com",
+        "scopes": ["openid", "email", "profile"]
+    },
     "host_permissions": [
         "http://127.0.0.1:8000/*"
     ],
     "background": {
-        "scripts": [
+        "service_worker":
             "background.js"
-        ]
+
     },
     "action": {
         "default_popup": "popup/popup.html",
