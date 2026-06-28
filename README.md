@@ -9,6 +9,6 @@ Extensión de navegador con backend FastAPI + SpaCy + SQLite.
 | Rol | GitHub |
 |-----|--------|
 | Frontend | @DavidRetuerto |
-| Frontend | @ |
+| Frontend | @andreavalfonzo |
 | Backend API | @Lorenx003 @niccolvs|
 | Backend DB | @Lorenx003 @niccolvs|
