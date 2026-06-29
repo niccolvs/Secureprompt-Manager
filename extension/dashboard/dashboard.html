@@ -44,10 +44,8 @@
 
     _auth.onAuthStateChanged((user) => {
       if (!user) {
-        // No hay sesión → volver al login
         window.location.replace("login.html");
       } else {
-        // Hay sesión → poblar datos del usuario
         const firstName = (user.displayName || user.email).split(/[ @]/)[0];
         const initials = (user.displayName || user.email)
           .split(" ").slice(0, 2).map(w => w[0].toUpperCase()).join("");
@@ -56,7 +54,6 @@
         document.getElementById("user-name").textContent = user.displayName || user.email;
         document.getElementById("user-email").textContent = user.email;
 
-        // Perfil grande
         document.getElementById("profile-name").textContent = user.displayName || user.email;
         document.getElementById("profile-email-lbl").textContent = user.email;
 
@@ -71,6 +68,11 @@
           avatarEl.textContent = initials;
           profileAvatarEl.textContent = initials;
           profileAvatarEl.classList.add("avatar-initials");
+        }
+
+        // Guardar user_id para que background.js pueda usarlo
+        if (typeof chrome !== "undefined" && chrome.storage) {
+          chrome.storage.local.set({ user_id: user.uid });
         }
 
         // Mostrar el dashboard
@@ -898,13 +900,15 @@
     // Esperar a Firebase antes de cargar datos
     _auth.onAuthStateChanged((user) => {
       if (user) {
+        if (typeof chrome !== "undefined" && chrome.storage) {
+          chrome.storage.local.set({ user_id: user.uid });
+        }
         fetchPrompts(user.uid);
         fetchStats(user.uid);
         fetchHistorial(user.uid);
         fetchTags();
       }
     });
-
     // ── Lógica Emoji Picker ───────────────────────
     let currentEmojiPromptId = null;
 

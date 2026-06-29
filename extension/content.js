@@ -483,6 +483,17 @@ function crearBotonFlotante() {
                 mapaTokensActual = response.data.analisis.entidades_detectadas;
                 estadoRevertible = true;
 
+                // Registrar en el historial
+                const plataforma = window.location.hostname.replace(/^www\./, "").split(".")[0];
+                chrome.runtime.sendMessage({
+                    action: "registrarHistorial",
+                    payload: {
+                        plataforma: plataforma,
+                        accion: "anonimizacion",
+                        texto_censurado: response.data.analisis.texto_limpio
+                    }
+                });
+
                 // Mostramos el check brevemente, luego cambiamos al icono de revertir
                 // para indicarle al usuario que puede deshacer la anonimizacion
                 iconSpan.textContent = "\u2705";
