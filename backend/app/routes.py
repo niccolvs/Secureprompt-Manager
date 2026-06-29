@@ -70,6 +70,12 @@ def crear_prompt(prompt: PromptCreate):
 
     prompt_id = cursor.lastrowid
 
+    for token, datos in resultado["entidades_detectadas"].items():
+        cursor.execute("""
+            INSERT INTO tokens (prompt_id, token, valor_real, tipo)
+            VALUES (?, ?, ?, ?)
+        """, (prompt_id, token, datos["valor_real"], datos["tipo"]))
+
     for tag_name in prompt.tags:
         cursor.execute("SELECT id FROM tags WHERE nombre = ?", (tag_name,))
         tag_row = cursor.fetchone()
@@ -149,9 +155,7 @@ def obtener_stats(user_id: str):
     total_prompts = cursor.fetchone()["total"]
 
     cursor.execute("""
-        SELECT COUNT(*) as total FROM tokens t
-        JOIN prompts p ON t.prompt_id = p.id
-        WHERE p.user_id = ?
+        SELECT COUNT(*) as total FROM historial WHERE user_id = ?
     """, (user_id,))
     total_censuras = cursor.fetchone()["total"]
 

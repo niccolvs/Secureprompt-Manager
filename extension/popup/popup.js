@@ -77,14 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById("link-plantillas").addEventListener("click", () => {
-    chrome.tabs.create({ url: dashboardUrl });
-  });
-
-  document.getElementById("link-analizador").addEventListener("click", () => {
-    chrome.tabs.create({ url: dashboardUrl });
+    chrome.tabs.create({ url: chrome.runtime.getURL("dashboard/prompts.html") });
   });
 
   document.getElementById("link-historial").addEventListener("click", () => {
-    chrome.tabs.create({ url: dashboardUrl });
+    chrome.tabs.create({ url: chrome.runtime.getURL("dashboard/historial.html") });
   });
 });
