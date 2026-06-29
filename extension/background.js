@@ -1,9 +1,6 @@
 // background.js — Service Worker de SecurePrompt Manager
-// Actúa como puente entre el content script y el backend FastAPI
-
 const API_BASE = "http://127.0.0.1:8000";
 
-// Detectar plataforma según la URL del tab
 function detectarPlataforma(url) {
   if (!url) return "Desconocido";
   if (url.includes("chatgpt.com") || url.includes("chat.openai.com")) return "ChatGPT";
@@ -14,10 +11,10 @@ function detectarPlataforma(url) {
   return "Otro";
 }
 
-// Registrar evento en el historial del backend
 function registrarHistorial(plataforma, texto_censurado) {
   chrome.storage.local.get("user_id", (result) => {
     const user_id = result.user_id || "";
+    console.log("Registrando historial para user_id:", user_id);
     fetch(`${API_BASE}/historial`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -25,8 +22,6 @@ function registrarHistorial(plataforma, texto_censurado) {
     }).catch((err) => console.error("SecurePrompt: Error registrando historial:", err));
   });
 }
-
-// Escuchar mensajes del content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "analizarTexto") {
     const { titulo, contenido, categoria } = message.payload;
@@ -42,7 +37,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return res.json();
       })
       .then((data) => {
-        // Registrar en historial tras análisis exitoso
         registrarHistorial(plataforma, contenido);
         sendResponse({ success: true, data });
       })
@@ -51,8 +45,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: false, error: err.message });
       });
 
-    // Retornar true indica que sendResponse se llamará de forma asíncrona
     return true;
+  }
+
+  if (message.action === "registrarHistorial") {
+    const { plataforma, accion, texto_censurado } = message.payload;
+    registrarHistorial(plataforma, texto_censurado);
+    return false;
   }
 });
 
