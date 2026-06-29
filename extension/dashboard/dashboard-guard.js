@@ -1,5 +1,10 @@
 // dashboard-guard.js
 // Inicializa Firebase y redirige a login si no hay sesion activa.
+
+// Aplicación de modo oscuro
+if (localStorage.getItem("theme") === "dark") {
+  document.documentElement.classList.add("dark-mode-pre");
+}
 // Las variables _auth y _storage quedan en el scope global
 // para que dashboard-main.js pueda usarlas.
 
