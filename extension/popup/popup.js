@@ -33,12 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('spm_theme', 'light');
   }
 
-  // ── Lógica del toggle de protección ──
+  // Logica del toggle de proteccion
   const protectionToggle = document.getElementById('protection-toggle');
   const statusText = document.getElementById('status-text');
   const statusCard = document.getElementById('status-card');
 
-  // Recuperar estado de protección (por defecto Activo = true)
   const isProtected = localStorage.getItem('spm_protection') !== 'false';
   protectionToggle.checked = isProtected;
   updateProtectionUI(isProtected);
@@ -61,13 +60,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Lógica de botones inferiores ──
+  // Logica de botones y links — todos usan chrome.runtime.getURL
+  // para abrir el dashboard como pagina de extension, no como servidor local
+  const dashboardUrl = chrome.runtime.getURL("dashboard/dashboard.html");
+
   document.getElementById('btn-reload').addEventListener('click', () => {
-    // Si estuviéramos en una extensión real, usaríamos chrome.runtime.reload()
-    window.location.reload();
+    chrome.runtime.reload();
   });
 
   document.getElementById('btn-dashboard').addEventListener('click', () => {
-    window.open('../dashboard/dashboard.html', '_blank');
+    chrome.tabs.create({ url: dashboardUrl });
+  });
+
+  document.getElementById("link-dashboard").addEventListener("click", () => {
+    chrome.tabs.create({ url: dashboardUrl });
+  });
+
+  document.getElementById("link-plantillas").addEventListener("click", () => {
+    chrome.tabs.create({ url: dashboardUrl });
+  });
+
+  document.getElementById("link-analizador").addEventListener("click", () => {
+    chrome.tabs.create({ url: dashboardUrl });
+  });
+
+  document.getElementById("link-historial").addEventListener("click", () => {
+    chrome.tabs.create({ url: dashboardUrl });
   });
 });

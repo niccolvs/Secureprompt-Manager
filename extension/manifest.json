@@ -6,15 +6,19 @@
     "permissions": [
         "activeTab",
         "scripting",
-        "storage"
+        "storage",
+        "identity",
+        "tabs"
     ],
+    "oauth2": {
+        "client_id": "1059291715077-j8fsb70pi3f2i07qcd4oh7dn485s0qis.apps.googleusercontent.com",
+        "scopes": ["openid", "email", "profile"]
+    },
     "host_permissions": [
         "http://127.0.0.1:8000/*"
     ],
     "background": {
-        "service_worker": "background.js",
-        "scripts": ["background.js"],
-        "type": "module"
+        "service_worker": "background.js"
     },
     "browser_specific_settings": {
         "gecko": {
@@ -36,9 +40,7 @@
                 "https://chat.deepseek.com/*",
                 "https://manus.im/*"
             ],
-            "js": [
-                "content.js"
-            ]
+            "js": ["content.js"]
         }
     ],
     "web_accessible_resources": [

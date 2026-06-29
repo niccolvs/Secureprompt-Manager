@@ -5,9 +5,17 @@ from app.models import PromptCreate, HistorialCreate, PromptIconUpdate
 from app.database import get_connection
 from datetime import datetime
 from app.ner import analizar_prompt
+from pydantic import BaseModel
 import random
 
 router = APIRouter()
+
+# Modelo simple para el endpoint /analizar — no requiere user_id
+# porque lo llama la extension sin saber quien esta autenticado
+class PromptAnalizar(BaseModel):
+    titulo:    str = ""
+    contenido: str
+    categoria: str = ""
 
 # ── COLORES PARA TAGS ─────────────────────────────
 TAG_COLORS = ["#FFEFC3", "#CDE6D3", "#EDD4F2", "#E3EEFD"]
@@ -41,6 +49,9 @@ def obtener_prompts(user_id: str):
 # ── POST /prompts ─────────────────────────────────
 @router.post("/prompts")
 def crear_prompt(prompt: PromptCreate):
+    # Anonimizar el contenido antes de guardar
+    resultado = analizar_prompt(prompt.contenido)
+
     conn = get_connection()
     cursor = conn.cursor()
     fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -52,7 +63,7 @@ def crear_prompt(prompt: PromptCreate):
         prompt.user_id,
         prompt.titulo,
         prompt.contenido,
-        prompt.contenido,
+        resultado["texto_limpio"],  # ahora sí guarda el texto anonimizado
         prompt.categoria,
         fecha
     ))
@@ -223,8 +234,9 @@ def actualizar_icono(prompt_id: int, update: PromptIconUpdate):
     return {"mensaje": f"Icono del prompt {prompt_id} actualizado"}
 
 # ── POST /prompts/analizar ────────────────────────
+# Lo llama la extension (background.js) sin user_id
 @router.post("/prompts/analizar")
-def analizar(prompt: PromptCreate):
+def analizar(prompt: PromptAnalizar):
     resultado = analizar_prompt(prompt.contenido)
     return {
         "titulo": prompt.titulo,
