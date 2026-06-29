@@ -70,7 +70,9 @@
           profileAvatarEl.classList.add("avatar-initials");
         }
 
-        // Guardar user_id para que background.js pueda usarlo
+        // Guardar user_id en localStorage
+        localStorage.setItem("user_id", user.uid);
+        // También en chrome.storage si está disponible
         if (typeof chrome !== "undefined" && chrome.storage) {
           chrome.storage.local.set({ user_id: user.uid });
         }
