@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+spacy>=3.0.0
+

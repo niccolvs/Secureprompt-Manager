@@ -1,0 +1,12 @@
+# Entorno virtual — no se sube al repo
+venv/
+
+# Base de datos local — cada quien tiene la suya
+*.db
+
+# Archivos de Python compilado
+__pycache__/
+*.pyc
+
+# Variables de entorno
+.env

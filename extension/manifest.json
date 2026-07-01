@@ -1,0 +1,57 @@
+{
+    "manifest_version": 3,
+    "name": "SecurePrompt Manager",
+    "version": "1.0",
+    "description": "Censura datos sensibles antes de enviarlos a ChatGPT",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "http://127.0.0.1:8000/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "scripts": ["background.js"],
+        "type": "module"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "secureprompt@usm.cl",
+            "strict_min_version": "109.0"
+        }
+    },
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_icon": "assets/logo/SPM_logo_extension.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://chatgpt.com/*",
+                "https://chat.openai.com/*",
+                "https://claude.ai/*",
+                "https://gemini.google.com/*",
+                "https://chat.deepseek.com/*",
+                "https://manus.im/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["assets/logo/SPM_logo_extension.png"],
+            "matches": [
+                "https://chatgpt.com/*",
+                "https://chat.openai.com/*",
+                "https://claude.ai/*",
+                "https://gemini.google.com/*",
+                "https://chat.deepseek.com/*",
+                "https://manus.im/*"
+            ]
+        }
+    ]
+}
