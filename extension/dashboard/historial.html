@@ -4,72 +4,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description"
-    content="Dashboard del Secure Prompt Manager — gestiona tu historial, estadísticas y prompts guardados de forma segura." />
-  <title>Dashboard — SecurePrompt Manager</title>
+  <title>Historial — SecurePrompt Manager</title>
 
- 
-  <!-- Tabler Icons -->
   <link rel="stylesheet" href="../vendor/tabler-icons.min.css" />
   <link rel="stylesheet" href="dashboard.css" />
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (local) -->
   <script src="../vendor/firebase-app-compat.js"></script>
   <script src="../vendor/firebase-auth-compat.js"></script>
   <script src="../vendor/firebase-storage-compat.js"></script>
 
-  <!-- Chart.js -->
-  <script src="../vendor/chart.js"></script>
-
-  <!-- Emoji Picker Element -->
-  <script type="module" src="../vendor/emoji-picker.js"></script>
-
-  <!-- Guard: redirige a login si no hay sesión activa -->
-  <script>
-    const _cfg = {
-      apiKey: "AIzaSyCfJornBnJQnMU0r2qjBOUTTjG2i82ATgw",
-      authDomain: "prompt-manager-1f2c5.firebaseapp.com",
-      projectId: "prompt-manager-1f2c5",
-      storageBucket: "prompt-manager-1f2c5.firebasestorage.app",
-      messagingSenderId: "1059291715077",
-      appId: "1:1059291715077:web:580fd43dfe54888f9f2e6c"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(_cfg);
-    const _auth = firebase.auth();
-    const _storage = firebase.storage();
-
-    document.documentElement.style.visibility = "hidden";
-    _auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.replace("login.html");
-      } else {
-        document.documentElement.style.visibility = "";
-      }
-    });
-  </script>
+  <!-- Guard compartido -->
+  <script src="dashboard-guard.js"></script>
 </head>
 
 <body>
 
-  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
-    Dashboard del Secure Prompt Manager — muestra historial, estadísticas y prompts guardados
-  </h2>
-
   <div class="spm-root" id="app">
-    <!-- ── Sidebar ── -->
+
+    <!-- Sidebar -->
     <div class="spm-sidebar">
       <div class="spm-logo">
         <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager"
           style="max-width:140px;height:auto;display:block" />
       </div>
-      <nav id="sidenav" aria-label="Navegación principal"></nav>
-      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesión" id="btn-logout">
+      <nav id="sidenav" aria-label="Navegacion principal"></nav>
+      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesion" id="btn-logout">
         <i class="ti ti-logout" aria-hidden="true" style="font-size:16px"></i>
-        Cerrar sesión
+        Cerrar sesion
       </div>
     </div>
 
-    <!-- ── Contenido principal ── -->
+    <!-- Contenido principal -->
     <div class="spm-main">
       <div class="spm-topbar">
         <div></div>
@@ -80,16 +46,14 @@
             <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
             <div style="font-size:11px;color:#6A8099" id="user-email"></div>
           </div>
-          <div style="position: relative;">
-            <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor: pointer;"
-              onclick="document.getElementById('profile-dropdown').classList.toggle('show')"></div>
-            
+          <div style="position:relative;">
+            <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor:pointer;"></div>
             <div id="profile-dropdown" class="spm-profile-dropdown spm-fade-in">
-              <div class="spm-dropdown-item" onclick="cerrarSesion()">
-                <i class="ti ti-logout" style="margin-right: 8px; font-size: 16px;"></i> Cerrar sesión
+              <div class="spm-dropdown-item" id="dropdown-cerrar-sesion">
+                <i class="ti ti-logout" style="margin-right:8px;font-size:16px;"></i> Cerrar sesion
               </div>
-              <div class="spm-dropdown-item danger" onclick="borrarCuenta()">
-                <i class="ti ti-trash" style="margin-right: 8px; font-size: 16px;"></i> Borrar cuenta
+              <div class="spm-dropdown-item danger" id="dropdown-borrar-cuenta">
+                <i class="ti ti-trash" style="margin-right:8px;font-size:16px;"></i> Borrar cuenta
               </div>
             </div>
           </div>
@@ -97,37 +61,39 @@
       </div>
 
       <!-- VISTA HISTORIAL -->
-      <div id="view-historial" style="display: flex; flex-direction: column; flex: 1;">
-        <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end;">
+      <div id="view-historial" style="display:flex;flex-direction:column;flex:1;">
+        <div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;">
           <div>
-            <h2 class="spm-h2" style="margin-bottom: 4px;">Historial de Censura</h2>
-            <p style="font-size: 13px; color: #6A8099; margin: 0;">Registro detallado de tus interacciones con las IAs</p>
+            <h2 class="spm-h2" style="margin-bottom:4px;">Historial de Censura</h2>
+            <p style="font-size:13px;color:#6A8099;margin:0;">Registro detallado de tus interacciones con las IAs</p>
           </div>
-          <button class="spm-btn spm-btn-ghost" onclick="borrarHistorial()" style="color: #DC2626; border-color: rgba(220,38,38,0.2); height: 38px; display: flex; align-items: center; gap: 6px; padding: 0 16px;">
+          <button id="btn-borrar-historial" class="spm-btn spm-btn-ghost"
+            style="color:#DC2626;border-color:rgba(220,38,38,0.2);height:38px;display:flex;align-items:center;gap:6px;padding:0 16px;">
             <i class="ti ti-trash"></i> Borrar historial
           </button>
         </div>
-        
-        <div id="historial-panel" style="flex: 1; overflow-y: auto; max-height: none; background: transparent; padding: 0; box-shadow: none;">
-          <!-- Items render here -->
-        </div>
+
+        <div id="historial-panel" style="flex:1;overflow-y:auto;max-height:none;background:transparent;padding:0;box-shadow:none;"></div>
       </div>
-      
+
       <!-- Modal Detalle Historial -->
-      <div id="modal-censurado" class="spm-modal spm-fade-in" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div class="spm-modal-content" style="background: #fff; width:100%; max-width:600px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-          <div style="padding:24px 24px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #EEF2F8;">
-             <h2 style="margin:0; font-size:18px; font-weight:600; color:#1C2B3A;">Detalle de la Interacción</h2>
-             <button onclick="cerrarModalCensurado()" style="background:none; border:none; cursor:pointer; color:#6A8099;"><i class="ti ti-x" style="font-size:20px;"></i></button>
+      <div id="modal-censurado" style="display:none;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;">
+        <div class="spm-modal-content" style="background:#fff;width:100%;max-width:600px;max-height:85vh;border-radius:12px;display:flex;flex-direction:column;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+          <div style="padding:24px 24px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EEF2F8;">
+            <h2 style="margin:0;font-size:18px;font-weight:600;color:#1C2B3A;">Detalle de la Interaccion</h2>
+            <button id="btn-cerrar-modal-censurado" style="background:none;border:none;cursor:pointer;color:#6A8099;">
+              <i class="ti ti-x" style="font-size:20px;"></i>
+            </button>
           </div>
-          <div style="padding:24px; overflow-y:auto; flex:1;">
-             <div id="censurado-contenido-box" style="background:#F4F7FB; border:1px solid #E1E8F0; border-radius:8px; padding:16px; font-size:13px; color:#2A3A4A; line-height:1.6; white-space:pre-wrap; font-family: 'Inter', sans-serif;"></div>
+          <div style="padding:24px;overflow-y:auto;flex:1;">
+            <div id="censurado-contenido-box"
+              style="background:#F4F7FB;border:1px solid #E1E8F0;border-radius:8px;padding:16px;font-size:13px;color:#2A3A4A;line-height:1.6;white-space:pre-wrap;font-family:'Inter',sans-serif;"></div>
           </div>
-          <div style="padding:16px 24px; border-top:1px solid #EEF2F8; display:flex; justify-content:flex-end; gap:12px;">
-             <button id="btn-toggle-censura" class="spm-btn spm-btn-dark" onclick="toggleCensura()" style="display: flex; align-items: center; gap: 6px;">
-               <i class="ti ti-shield-check"></i> <span>Censurar Texto</span>
-             </button>
-             <button class="spm-btn spm-btn-ghost" onclick="cerrarModalCensurado()">Cerrar</button>
+          <div style="padding:16px 24px;border-top:1px solid #EEF2F8;display:flex;justify-content:flex-end;gap:12px;">
+            <button id="btn-toggle-censura" class="spm-btn spm-btn-dark" style="display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-shield-check"></i> <span>Censurar Texto</span>
+            </button>
+            <button id="btn-cerrar-modal-footer" class="spm-btn spm-btn-ghost">Cerrar</button>
           </div>
         </div>
       </div>
@@ -135,281 +101,14 @@
     </div>
   </div>
 
-  <div id="emoji-picker-container"
-    style="display:none; position: absolute; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px;">
-    <emoji-picker></emoji-picker>
-  </div>
-
-  
+  <script src="historial-main.js"></script>
 
   <style>
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
-  
-<script>
-    const API_URL = "http://127.0.0.1:8000";
-    let activeNav = "Historial";
 
-    function renderNav() {
-      const nav = document.getElementById("sidenav");
-      if (!nav) return;
-      nav.innerHTML = `
-        <a href="dashboard.html" class="spm-nav-item ${activeNav === 'Dashboard' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Dashboard</a>
-        <a href="prompts.html" class="spm-nav-item ${activeNav === 'Tus prompts' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Tus prompts</a>
-        <a href="historial.html" class="spm-nav-item ${activeNav === 'Historial' ? 'active' : ''}" style="text-decoration:none; color:inherit; display:block;" role="menuitem">Historial</a>
-      `;
-    }
-
-    // ── Tema Oscuro ──────────────────────────────
-    const themeToggle = document.getElementById("theme-toggle");
-    if (themeToggle) {
-        if (localStorage.getItem("theme") === "dark") {
-          document.body.classList.add("dark-mode");
-          themeToggle.classList.remove("ti-moon");
-          themeToggle.classList.add("ti-sun");
-        }
-        themeToggle.addEventListener("click", () => {
-          document.body.classList.toggle("dark-mode");
-          const isDark = document.body.classList.contains("dark-mode");
-          localStorage.setItem("theme", isDark ? "dark" : "light");
-          if (isDark) {
-            themeToggle.classList.remove("ti-moon");
-            themeToggle.classList.add("ti-sun");
-          } else {
-            themeToggle.classList.remove("ti-sun");
-            themeToggle.classList.add("ti-moon");
-          }
-        });
-    }
-    
-    // ── Auth y Header ────────────────────────────
-    if (typeof firebase !== 'undefined') {
-        // _auth was initialized in head
-        _auth.onAuthStateChanged(user => {
-            if (!user) {
-              window.location.replace("login.html");
-            } else {
-              let firstName = "Usuario";
-              if (user.displayName) {
-                firstName = user.displayName.split(" ")[0];
-              }
-              const greetingEl = document.getElementById("greeting");
-              if (greetingEl) greetingEl.textContent = `Hola, ${firstName}!`;
-              
-              const nameEl = document.getElementById("user-name");
-              if (nameEl) nameEl.textContent = user.displayName || user.email;
-              
-              const emailEl = document.getElementById("user-email");
-              if (emailEl) emailEl.textContent = user.email;
-              
-              if (user.photoURL) {
-                const imgHtml = `<img src="${user.photoURL}" alt="Foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-                const topAvatar = document.getElementById("user-avatar");
-                if (topAvatar) topAvatar.innerHTML = imgHtml;
-                const profileAvatar = document.getElementById("profile-avatar");
-                if (profileAvatar) profileAvatar.innerHTML = imgHtml;
-              }
-            }
-        });
-        
-        const btnLogout = document.getElementById("btn-logout");
-        if (btnLogout) {
-            btnLogout.addEventListener("click", () => {
-              _auth.signOut().then(() => window.location.replace("login.html"));
-            });
-        }
-    }
-
-    let originalTextCache = '';
-    let censoredTextCache = '';
-    let isCensoredMode = false;
-
-    function abrirModalCensurado(texto) {
-      originalTextCache = texto || 'No hay texto registrado.';
-      censoredTextCache = '';
-      isCensoredMode = false;
-      
-      const contentBox = document.getElementById("censurado-contenido-box");
-      const toggleBtn = document.getElementById("btn-toggle-censura");
-      const toggleBtnText = toggleBtn.querySelector("span");
-      const toggleBtnIcon = toggleBtn.querySelector("i");
-      
-      contentBox.textContent = originalTextCache;
-      toggleBtnText.textContent = "Censurar Texto";
-      toggleBtnIcon.className = "ti ti-shield-check";
-      
-      const modalContent = document.querySelector("#modal-censurado .spm-modal-content");
-      const isDark = document.body.classList.contains("dark-mode");
-      if (isDark) {
-        modalContent.style.background = '#15202B';
-        modalContent.style.borderColor = '#2C3D58';
-        modalContent.querySelector('h2').style.color = '#fff';
-        const closeBtn = modalContent.querySelector('button i.ti-x');
-        if(closeBtn) closeBtn.parentElement.style.color = '#fff';
-        contentBox.style.background = '#0B1120';
-        contentBox.style.color = '#fff';
-        contentBox.style.borderColor = '#2C3D58';
-      } else {
-        modalContent.style.background = '#fff';
-        modalContent.style.borderColor = 'none';
-        modalContent.querySelector('h2').style.color = '#1C2B3A';
-        const closeBtn = modalContent.querySelector('button i.ti-x');
-        if(closeBtn) closeBtn.parentElement.style.color = '#6A8099';
-        contentBox.style.background = '#F4F7FB';
-        contentBox.style.color = '#2A3A4A';
-        contentBox.style.borderColor = '#E1E8F0';
-      }
-      
-      document.getElementById("modal-censurado").style.display = "flex";
-    }
-
-    async function toggleCensura() {
-      const contentBox = document.getElementById("censurado-contenido-box");
-      const toggleBtn = document.getElementById("btn-toggle-censura");
-      const toggleBtnText = toggleBtn.querySelector("span");
-      const toggleBtnIcon = toggleBtn.querySelector("i");
-      
-      if (!isCensoredMode) {
-        if (!censoredTextCache) {
-          toggleBtnText.textContent = "Censurando...";
-          try {
-            const res = await fetch(`${API_URL}/prompts/analizar`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ titulo: "Historial", contenido: originalTextCache, categoria: "General" })
-            });
-            if (res.ok) {
-              const data = await res.json();
-              censoredTextCache = data.contenido_limpio || originalTextCache;
-            } else {
-              censoredTextCache = "Error al censurar.";
-            }
-          } catch (e) {
-            censoredTextCache = "Error de conexión al censurar.";
-          }
-        }
-        contentBox.textContent = censoredTextCache;
-        toggleBtnText.textContent = "Ver Original";
-        toggleBtnIcon.className = "ti ti-eye";
-        isCensoredMode = true;
-      } else {
-        contentBox.textContent = originalTextCache;
-        toggleBtnText.textContent = "Censurar Texto";
-        toggleBtnIcon.className = "ti ti-shield-check";
-        isCensoredMode = false;
-      }
-    }
-
-    function cerrarModalCensurado() {
-      document.getElementById("modal-censurado").style.display = "none";
-    }
-
-    async function fetchHistorial(userId) {
-      try {
-        const res = await fetch(`${API_URL}/historial/${userId}`);
-        if (!res.ok) throw new Error("Error del servidor");
-        const data = await res.json();
-        renderHistorial(data.historial || []);
-      } catch (err) {
-        console.error("Error cargando historial:", err);
-        renderHistorial([]);
-      }
-    }
-
-    function renderHistorial(historial) {
-      const panel = document.getElementById("historial-panel");
-      if (!panel) return;
-      if (historial.length === 0) {
-        panel.innerHTML = `
-          <div class="spm-empty-state">
-            <i class="ti ti-history" aria-hidden="true"></i>
-            <span class="empty-title">Sin actividad reciente</span>
-            <span class="empty-sub">Aquí aparecerá el registro de tus interacciones con las IAs</span>
-          </div>`;
-        return;
-      }
-      panel.innerHTML = historial.map(h => {
-        const safeText = encodeURIComponent(h.texto_censurado || '');
-        
-        // Determinar icono según plataforma (opcional, fallback genérico)
-        let iconClass = "ti-history";
-        if (h.plataforma.toLowerCase().includes("chatgpt")) iconClass = "ti-message-chatbot";
-        else if (h.plataforma.toLowerCase().includes("claude")) iconClass = "ti-brain";
-        else if (h.plataforma.toLowerCase().includes("gemini")) iconClass = "ti-sparkles";
-        
-        return `
-        <div class="spm-prompt-item spm-fade-in" style="cursor: pointer; border-left: 4px solid transparent; padding: 16px; margin-bottom: 12px;" onclick="abrirModalCensurado(decodeURIComponent('${safeText}'))">
-          <div style="flex-shrink:0; width: 40px; height: 40px; border-radius: 50%; background: rgba(92, 127, 163, 0.15); color: #5C7FA3; display: flex; align-items: center; justify-content: center; margin-right: 16px; transition: all 0.2s;">
-            <i class="ti ${iconClass}" aria-hidden="true" style="font-size:18px;"></i>
-          </div>
-          <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-              <span style="font-weight:600; font-size:15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85%; color: var(--text-primary, inherit);" class="prompt-title">${h.plataforma}</span>
-              <span style="font-size:11px; opacity:0.6; white-space: nowrap; margin-top:2px;">${h.fecha} ${h.hora}</span>
-            </div>
-            <span style="font-size:13px; opacity:0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; display:block;" class="prompt-preview">Haz clic para ver el contenido censurado de la conversación.</span>
-          </div>
-          <div style="display:flex; align-items:center; margin-left:12px;">
-            <i class="ti ti-chevron-right" style="color: #6A8099;"></i>
-          </div>
-        </div>
-      `}).join("");
-    }
-
-    async function borrarHistorial() {
-      if (!confirm("¿Quieres borrar el historial?")) return;
-      const user = _auth.currentUser;
-      if (!user) return;
-      try {
-        const res = await fetch(`${API_URL}/historial/${user.uid}`, { method: "DELETE" });
-        if (res.ok) fetchHistorial(user.uid);
-      } catch (err) {
-        console.error("Error al borrar historial:", err);
-      }
-    }
-
-    function cerrarSesion() {
-      _auth.signOut().then(() => {
-        window.location.replace("login.html");
-      });
-    }
-
-    function borrarCuenta() {
-      if(confirm("¿Estás seguro de que quieres borrar tu cuenta? Esta acción no se puede deshacer.")) {
-        const user = _auth.currentUser;
-        if(user) {
-          user.delete().then(() => window.location.replace("login.html")).catch(err => {
-            console.error(err);
-            alert("Error al borrar la cuenta. Puede que necesites volver a iniciar sesión antes de realizar esta acción.");
-          });
-        }
-      }
-    }
-
-    document.addEventListener("click", (e) => {
-      const dropdownProfile = document.getElementById("profile-dropdown");
-      const avatar = document.getElementById("user-avatar");
-      if (dropdownProfile && dropdownProfile.classList.contains("show") && !dropdownProfile.contains(e.target) && !avatar.contains(e.target)) {
-        dropdownProfile.classList.remove("show");
-      }
-    });
-
-    renderNav();
-
-    _auth.onAuthStateChanged((user) => {
-      if (user) {
-        fetchHistorial(user.uid);
-      }
-    });
-  </script>
 </body>
 </html>
-
