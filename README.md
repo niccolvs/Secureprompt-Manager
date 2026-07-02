@@ -32,3 +32,5 @@ PD: no meterse al link que indica la consola.
 3. Activar el modo desarrollador (en caso de ser necesario).
 4. Realizar la carga de la extensión (en caso de ser desempaquetada, seleccionar la carpeta *extension* del proyecto. En caso de solicitar un archivo en vez de una carpeta, seleecionar el archivo *manifest.json* dentro de la misma carpeta de *extension*.
 5. Con esto, ya se debe tener la extensión disponible para su uso, mirandola en el extremo superior derecho, y en las páginas de IA provistas.
+
+PD: Para poder usar la extensión la cuenta Google de la IA tiene que ser la misma que la que se use en el complemento
