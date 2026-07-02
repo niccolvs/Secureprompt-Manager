@@ -1,6 +1,7 @@
 {
     "manifest_version": 3,
     "name": "SecurePrompt Manager",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA30PjJzAzp1vqQocFc5G91S2kip2UhZ/A8yCULkhvrSTkmhpGpHw8ayE6vCcideTw5yyaN9+2knp05qgFBJab21jFgOc8cHUwyzSBSz7d7V2Z2msIf/HKG5GaJcW5ZsyqLKAwdkmJY7ulG7LKRxsZEYZzaIAG6HZLzhdmAFBwySSgmfwUFX0arTVMniactxnO8K/Yr0Ki2YjyieSSJGN6n44NWjgiLsb/V40oTHPlh8U3BmWvcroLAhUf8qosKbqUPnh0r5mJBgl33hQZTEBvoD46Gos06QZ3jT2jH+CVa/RPEiHUPF8ty7m/QCFfkrjVxj73FqnVRGnmLI7oBUbgZwIDAQAB",
     "version": "1.0",
     "description": "Censura datos sensibles antes de enviarlos a ChatGPT",
     "permissions": [
