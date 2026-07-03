@@ -5,6 +5,14 @@
   padding: 0;
 }
 
+html {
+  background: #EFF4FA;
+}
+
+html.dark-mode-pre {
+  background: #0B1120;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: #EFF4FA;
