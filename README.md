@@ -1,9 +1,9 @@
 # SecurePrompt Manager
-Extensión de navegador con backend FastAPI + SpaCy + SQLite.
-
-## Estructura
-- `extension/` → Frontend (HTML, CSS, JS, ManifestV3)
-- `backend/` → Servidor FastAPI + SpaCy + SQLite
+Extensión de navegador para gestionar prompts de IA.
+Funcionalidades principales:
+* Censura de información sensible dentro del chat de IA
+* Dashboard con resumen y métricas de uso
+* Gestor de plantillas de prompts
 
 ## Equipo
 | Rol | GitHub |
