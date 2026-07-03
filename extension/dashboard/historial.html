@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historial — SecurePrompt Manager</title>
+
+  <link rel="stylesheet" href="../vendor/tabler-icons.min.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+
+  <!-- Firebase SDK (local) -->
+  <script src="../vendor/firebase-app-compat.js"></script>
+  <script src="../vendor/firebase-auth-compat.js"></script>
+  <script src="../vendor/firebase-storage-compat.js"></script>
+
+  <!-- Guard compartido -->
+  <script src="dashboard-guard.js"></script>
+</head>
+
+<body>
+
+  <div class="spm-root" id="app">
+
+    <!-- Sidebar -->
+    <div class="spm-sidebar">
+      <div class="spm-logo">
+        <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager"
+          style="max-width:140px;height:auto;display:block" />
+      </div>
+      <nav id="sidenav" aria-label="Navegacion principal"></nav>
+      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesion" id="btn-logout">
+        <i class="ti ti-logout" aria-hidden="true" style="font-size:16px"></i>
+        Cerrar sesion
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="spm-main">
+      <div class="spm-topbar">
+        <div></div>
+        <div class="spm-user">
+          <i id="theme-toggle" class="ti ti-moon" aria-hidden="true"
+            style="font-size:18px;color:#6A8099;cursor:pointer;" title="Cambiar tema"></i>
+          <div style="text-align:right">
+            <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
+            <div style="font-size:11px;color:#6A8099" id="user-email"></div>
+          </div>
+          <div style="position:relative;">
+            <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor:pointer;"></div>
+            <div id="profile-dropdown" class="spm-profile-dropdown spm-fade-in">
+              <div class="spm-dropdown-item" id="dropdown-cerrar-sesion">
+                <i class="ti ti-logout" style="margin-right:8px;font-size:16px;"></i> Cerrar sesion
+              </div>
+              <div class="spm-dropdown-item danger" id="dropdown-borrar-cuenta">
+                <i class="ti ti-trash" style="margin-right:8px;font-size:16px;"></i> Borrar cuenta
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA HISTORIAL -->
+      <div id="view-historial" style="display:flex;flex-direction:column;flex:1;">
+        <div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <h2 class="spm-h2" style="margin-bottom:4px;">Historial de Censura</h2>
+            <p style="font-size:13px;color:#6A8099;margin:0;">Registro detallado de tus interacciones con las IAs</p>
+          </div>
+          <button id="btn-borrar-historial" class="spm-btn spm-btn-ghost"
+            style="color:#DC2626;border-color:rgba(220,38,38,0.2);height:38px;display:flex;align-items:center;gap:6px;padding:0 16px;">
+            <i class="ti ti-trash"></i> Borrar historial
+          </button>
+        </div>
+
+        <div id="historial-panel" style="flex:1;overflow-y:auto;max-height:none;background:transparent;padding:0;box-shadow:none;"></div>
+      </div>
+
+      <!-- Modal Detalle Historial -->
+      <div id="modal-censurado" style="display:none;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1000;">
+        <div class="spm-modal-content" style="background:#fff;width:100%;max-width:600px;max-height:85vh;border-radius:12px;display:flex;flex-direction:column;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+          <div style="padding:24px 24px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EEF2F8;">
+            <h2 style="margin:0;font-size:18px;font-weight:600;color:#1C2B3A;">Detalle de la Interaccion</h2>
+            <button id="btn-cerrar-modal-censurado" style="background:none;border:none;cursor:pointer;color:#6A8099;">
+              <i class="ti ti-x" style="font-size:20px;"></i>
+            </button>
+          </div>
+          <div style="padding:24px;overflow-y:auto;flex:1;">
+            <div id="censurado-contenido-box"
+              style="background:#F4F7FB;border:1px solid #E1E8F0;border-radius:8px;padding:16px;font-size:13px;color:#2A3A4A;line-height:1.6;white-space:pre-wrap;font-family:'Inter',sans-serif;"></div>
+          </div>
+          <div style="padding:16px 24px;border-top:1px solid #EEF2F8;display:flex;justify-content:flex-end;gap:12px;">
+            <button id="btn-toggle-censura" class="spm-btn spm-btn-dark" style="display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-shield-check"></i> <span>Censurar Texto</span>
+            </button>
+            <button id="btn-cerrar-modal-footer" class="spm-btn spm-btn-ghost">Cerrar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="historial-main.js"></script>
+
+  <style>
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+</body>
+</html>

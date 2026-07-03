@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>SPM Popup</title>
+  <link rel="stylesheet" href="../vendor/tabler-icons.min.css" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup-container">
+
+  <header>
+    <div class="logo-area">
+      <img src="../assets/logo/SPM_logo_oscuro.png" alt="SecurePrompt Manager" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+      <span class="logo-text" style="display:none; font-weight:700; color:#1C2B3A; font-size:18px;">SecurePrompt</span>
+    </div>
+    <div class="header-actions">
+      <i class="ti ti-moon" id="btn-theme" title="Alternar tema"></i>
+      <i class="ti ti-settings" title="Ajustes"></i>
+      <i class="ti ti-help-circle" title="Ayuda"></i>
+    </div>
+  </header>
+
+  <main>
+    <!-- ESTADO DE PROTECCION -->
+    <div class="status-card" id="status-card">
+      <div class="status-info">
+        <span class="status-label">Estado de proteccion</span>
+        <span class="status-value" id="status-text">Activo</span>
+      </div>
+      <label class="spm-toggle">
+        <input type="checkbox" id="protection-toggle" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <a id="link-dashboard" class="menu-item">
+      <div class="item-icon"><i class="ti ti-layout-dashboard"></i></div>
+      <div class="item-content">
+        <h3>Dashboard</h3>
+        <p>Accede al panel principal de gestion.</p>
+      </div>
+    </a>
+
+    <a id="link-plantillas" class="menu-item">
+      <div class="item-icon"><i class="ti ti-template"></i></div>
+      <div class="item-content">
+        <h3>Plantillas</h3>
+        <p>Gestiona y organiza tus prompts guardados.</p>
+      </div>
+    </a>
+
+    <a id="link-historial" class="menu-item">
+      <div class="item-icon"><i class="ti ti-history"></i></div>
+      <div class="item-content">
+        <h3>Historial</h3>
+        <p>Revisa interacciones y bloqueos previos.</p>
+      </div>
+    </a>
+  </main>
+
+  <footer>
+    <button class="btn btn-outline" id="btn-reload">
+      <i class="ti ti-refresh"></i> Recargar Extension
+    </button>
+    <button class="btn btn-outline" id="btn-dashboard">
+      <i class="ti ti-external-link"></i> Abrir Dashboard
+    </button>
+  </footer>
+
+  </div><!-- /.popup-container -->
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tus Prompts — SecurePrompt Manager</title>
+
+  <link rel="stylesheet" href="../vendor/tabler-icons.min.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+
+  <!-- Firebase SDK (local) -->
+  <script src="../vendor/firebase-app-compat.js"></script>
+  <script src="../vendor/firebase-auth-compat.js"></script>
+  <script src="../vendor/firebase-storage-compat.js"></script>
+
+  <!-- Guard compartido con el dashboard -->
+  <script src="dashboard-guard.js"></script>
+</head>
+
+<body>
+
+  <div class="spm-root" id="app">
+
+    <!-- Sidebar -->
+    <div class="spm-sidebar">
+      <div class="spm-logo">
+        <img src="../assets/logo/SPM_logo_claro.png" alt="SecurePrompt Manager"
+          style="max-width:140px;height:auto;display:block" />
+      </div>
+      <nav id="sidenav" aria-label="Navegacion principal"></nav>
+      <div class="spm-logout" role="button" tabindex="0" aria-label="Cerrar sesion" id="btn-logout">
+        <i class="ti ti-logout" aria-hidden="true" style="font-size:16px"></i>
+        Cerrar sesion
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="spm-main">
+      <div class="spm-topbar">
+        <div></div>
+        <div class="spm-user">
+          <i id="theme-toggle" class="ti ti-moon" aria-hidden="true"
+            style="font-size:18px;color:#6A8099;cursor:pointer;" title="Cambiar tema"></i>
+          <div style="text-align:right">
+            <div style="font-size:13px;font-weight:500;color:#1C2B3A" id="user-name"></div>
+            <div style="font-size:11px;color:#6A8099" id="user-email"></div>
+          </div>
+          <div style="position:relative;">
+            <div class="spm-avatar" id="user-avatar" aria-label="Avatar del usuario" style="cursor:pointer;"></div>
+            <div id="profile-dropdown" class="spm-profile-dropdown spm-fade-in">
+              <div class="spm-dropdown-item" id="dropdown-cerrar-sesion">
+                <i class="ti ti-logout" style="margin-right:8px;font-size:16px;"></i> Cerrar sesion
+              </div>
+              <div class="spm-dropdown-item danger" id="dropdown-borrar-cuenta">
+                <i class="ti ti-trash" style="margin-right:8px;font-size:16px;"></i> Borrar cuenta
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA TUS PROMPTS -->
+      <div id="view-prompts" style="display:flex;flex-direction:column;flex:1;">
+        <div style="margin-bottom:30px;">
+          <h2 class="spm-h2" style="margin-bottom:4px;">Tus prompts</h2>
+          <p style="font-size:13px;color:#6A8099;margin:0;">Aqui se guardan todas tus plantillas de prompt</p>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <div style="position:relative;flex:1;">
+            <i class="ti ti-search"
+              style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6A8099;"></i>
+            <input type="text" id="prompts-search-input" placeholder="Buscar prompts..." class="spm-input"
+              style="width:100%;padding-left:36px;height:38px;border:1px solid #C0D4E8;border-radius:6px;outline:none;">
+          </div>
+          <div style="position:relative;">
+            <button class="spm-btn spm-btn-ghost" id="prompts-filter-btn"
+              style="height:38px;display:flex;align-items:center;gap:6px;padding:0 16px;">
+              <i class="ti ti-filter"></i> <span id="filter-btn-text">Filtrar</span>
+            </button>
+            <div id="filter-dropdown" class="spm-modal-content spm-fade-in"
+              style="position:absolute;top:100%;right:0;background:#fff;border:1px solid #C0D4E8;border-radius:6px;margin-top:8px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:none;z-index:100;min-width:180px;max-height:250px;overflow-y:auto;">
+            </div>
+          </div>
+          <button class="spm-btn spm-btn-dark" id="btn-nuevo-prompt"
+            style="height:38px;display:flex;align-items:center;gap:6px;padding:0 16px;">
+            <i class="ti ti-plus"></i> Nuevo
+          </button>
+        </div>
+        <div id="full-prompts-list"
+          style="overflow-y:auto;flex:1;padding-right:4px;display:flex;flex-direction:column;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="prompts-main.js"></script>
+
+  <style>
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+</body>
+</html>
